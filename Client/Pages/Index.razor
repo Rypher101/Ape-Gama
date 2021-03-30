@@ -1,7 +1,12 @@
 ﻿@page "/"
-
-<h1>Hello, world!</h1>
-
-Welcome to your new app.
-
-<SurveyPrompt Title="How is Blazor working for you?" />
+@layout HomeLayout
+    <div id="wrapper">
+        <HomeHeader />
+        <div class="main">
+            <ApeGama.Client.Shared.Slider />
+            <HomeBody />
+        </div>
+            <HomeFooter />
+        
+    </div>
+<NavMenu/>

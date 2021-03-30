@@ -3,11 +3,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.31105.61
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ApeGama.Server", "Server\ApeGama.Server.csproj", "{36684B5D-699A-4DEE-9E87-FE7F48444297}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ApeGama.Server", "Server\ApeGama.Server.csproj", "{36684B5D-699A-4DEE-9E87-FE7F48444297}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ApeGama.Client", "Client\ApeGama.Client.csproj", "{C75C8A33-0575-49F9-BF84-DD2ECEEAC823}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ApeGama.Client", "Client\ApeGama.Client.csproj", "{C75C8A33-0575-49F9-BF84-DD2ECEEAC823}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ApeGama.Shared", "Shared\ApeGama.Shared.csproj", "{3C502086-2C87-4AEF-AACB-EED6A816A7FD}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ApeGama.Shared", "Shared\ApeGama.Shared.csproj", "{3C502086-2C87-4AEF-AACB-EED6A816A7FD}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

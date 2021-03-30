@@ -1,4 +1,4 @@
-using ApeGama.Server.Models;
+using ApeGama.Server.Data;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
@@ -55,7 +55,7 @@ namespace ApeGama.Server
             {
                 endpoints.MapRazorPages();
                 endpoints.MapControllers();
-                endpoints.MapFallbackToFile("index.html");
+                endpoints.MapFallbackToFile("index_tmp.html");
             });
         }
     }
