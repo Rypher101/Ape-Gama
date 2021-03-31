@@ -1,0 +1,46 @@
+﻿<nav id="menu">
+    <div class="inner">
+        <h2>Menu</h2>
+        <ul>
+            <li><a href="/" class="@Home">Home</a></li>
+
+            <li><a href="login_customer" class="@Login">Login</a></li>
+
+            <li><a href="menu.html">Menu</a></li>
+
+            <li>
+                <a href="#" class="dropdown-toggle">About</a>
+
+                <ul>
+                    <li><a href="about.html">About Us</a></li>
+                    <li><a href="blog.html">Blog</a></li>
+                    <li><a href="testimonials.html">Testimonials</a></li>
+                </ul>
+            </li>
+            <li><a href="contact.html">Contact Us</a></li>
+        </ul>
+    </div><a class="close" href="#menu">Close</a>
+</nav>
+@code {
+    [Parameter]
+    public string NavItem { get; set; }
+    public string Home { get; set; }
+    public string Login { get; set; }
+
+    protected override void OnInitialized()
+    {
+        switch (NavItem)
+        {
+            case "HomeNav":
+                Home = "active";
+                break;
+            case "LoginNav":
+                Login = "active";
+                break;
+
+            default:
+                break;
+        }
+        base.OnInitialized();
+    }
+}

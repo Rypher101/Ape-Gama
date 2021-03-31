@@ -55,7 +55,7 @@ namespace ApeGama.Server
             {
                 endpoints.MapRazorPages();
                 endpoints.MapControllers();
-                endpoints.MapFallbackToFile("index_tmp.html");
+                endpoints.MapFallbackToFile("index.html");
             });
         }
     }
