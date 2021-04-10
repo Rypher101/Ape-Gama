@@ -1,5 +1,8 @@
 ﻿@page "/register_customer"
 @inject NavigationManager UriHelper
+@inject ISnackbar SB
+@inject HttpClient http
+@inject NavigationManager UriHelper
 
 <div id="wrapper">
     <HomeHeader />
@@ -8,41 +11,131 @@
             <div class="col-md-4 offset-4">
                 <h2 class="h2"><center>Customer Registration</center></h2>
                 <br />
-                <form action="/" method="post">
+                <EditForm Model="@userModel" OnValidSubmit="@HandleValidSubmit">
                     <div class="form-group">
-                        <input type="text" class="form-control rounded-left" placeholder="Name" required>
+                        <input type="text" class="form-control rounded-left" placeholder="Name" required @bind-value="userModel.UserName">
                     </div>
                     <div class="form-group">
-                        <input type="email" class="form-control rounded-left" placeholder="Email" required>
+                        <input type="email" class="form-control rounded-left" placeholder="Email" required @bind-value="userModel.UserEmail">
                     </div>
                     <div class="form-group">
-                        <input type="password" class="form-control rounded-left" placeholder="Password" required>
+                        <input type="@pass" class="form-control rounded-left" placeholder="Password" required @onmousemove="()=>SetToText(1)" @onmouseout="()=>SetToPass(1)" @bind-value="passVal" @bind-value:event="oninput" style="color:@passColor" @onkeyup="CheckPassword">
                     </div>
                     <div class="form-group">
-                        <input type="password" class="form-control rounded-left" placeholder="Confirm Password" required>
+                        <input type="@passConf" class="form-control rounded-left" placeholder="Confirm Password" required @onmousemove="()=>SetToText(2)" @onmouseout="()=>SetToPass(2)" @bind="passConfVal" @bind:event="oninput" style="color:@passColor" @onkeyup="CheckPassword">
                     </div>
                     <div class="form-group">
-                        <input  type="text" class="form-control rounded-left" placeholder="Contact Number" required>
+                        <input type="text" class="form-control rounded-left" placeholder="Contact Number" required @bind-value="userModel.UserTp" @onblur="TPCheck">
                     </div>
                     <div class="form-group">
-                        <input type="text" class="form-control rounded-left" placeholder="Address" required>
+                        <input type="text" class="form-control rounded-left" placeholder="Address" required @bind-value="userModel.UserAddress">
                     </div>
                     <div class="form-group align-items-center">
                         <div class="justify-content-end">
                             <button class="primary" style="width:100%">Register</button>
                         </div>
                     </div>
-                </form>
+                </EditForm>
             </div>
         </div>
     </div>
     <HomeFooter></HomeFooter>
 </div>
 <NavMenu NavItem="LoginNav" />
+
 @code {
+    private string pass { get; set; } = "password";
+    private string passConf { get; set; } = "password";
+    private bool validPassword = false, validTP = false;
+    private string passConfVal, passColor, passValidateMessage, passVal;
+    private User userModel = new User();
+
     void ToSignUp()
     {
         UriHelper.NavigateTo("register_customer");
+    }
+
+    void SetToText(int x)
+    {
+        switch (x)
+        {
+            case 1:
+                pass = "text";
+                break;
+            case 2:
+                passConf = "text";
+                break;
+        }
+    }
+
+    void SetToPass(int x)
+    {
+        switch (x)
+        {
+            case 1:
+                pass = "password";
+                break;
+            case 2:
+                passConf = "password";
+                break;
+        }
+    }
+
+    void CheckPassword()
+    {
+        if (passVal == passConfVal)
+        {
+            validPassword = true;
+            passColor = "";
+        }
+        else
+        {
+            validPassword = false;
+            passColor = "lightcoral";
+        }
+    }
+
+    private async Task HandleValidSubmit()
+    {
+        if (validPassword && validTP)
+        {
+            userModel.UserPass = passVal;
+            userModel.ShaEnc();
+            var response = await http.PostAsJsonAsync("api/Users", userModel);
+            if (response.IsSuccessStatusCode)
+            {
+                UriHelper.NavigateTo("login_customer/ /User registered!");
+            }
+            else if(response.StatusCode == System.Net.HttpStatusCode.Conflict)
+            {
+
+                SB.Add("This email address already exists. Please user another Email address", Severity.Error);
+            }
+            else
+            {
+                UriHelper.NavigateTo("login_customer/User registration faild. Please try again./%20");
+            }
+        }
+        else
+        {
+            if (!validPassword) SB.Add("Confirm password mismatch", Severity.Error);
+            if (!validTP) SB.Add("Invalid Contact Number", Severity.Error);
+        }
+
+    }
+
+    void TPCheck()
+    {
+        if (!int.TryParse(userModel.UserTp, out _))
+        {
+            userModel.UserTp = "";
+            SB.Add("Invalid Contact Number", Severity.Error);
+            validTP = false;
+        }
+        else
+        {
+            validTP = true;
+        }
     }
 
 }

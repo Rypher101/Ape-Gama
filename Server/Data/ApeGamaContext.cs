@@ -1,7 +1,7 @@
 ﻿using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
-using ApeGama.Server.Shared;
+using ApeGama.Shared;
 using System.Configuration;
 
 #nullable disable

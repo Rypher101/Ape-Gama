@@ -7,6 +7,8 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using MudBlazor;
+using MudBlazor.Services;
 using System.Linq;
 
 namespace ApeGama.Server
@@ -24,10 +26,10 @@ namespace ApeGama.Server
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
         {
-
             services.AddControllersWithViews();
             services.AddRazorPages();
             services.AddDbContext<ApeGamaContext>(options => options.UseSqlServer(Configuration.GetConnectionString("MainDB")));
+
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

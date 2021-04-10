@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 #nullable disable
 
-namespace ApeGama.Server.Shared
+namespace ApeGama.Shared
 {
     [Table("Online_Shop")]
     public partial class OnlineShop
