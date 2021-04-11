@@ -1,4 +1,4 @@
-﻿@page "/register_customer"
+﻿@page "/register_supplier"
 @inject NavigationManager UriHelper
 @inject ISnackbar SB
 @inject HttpClient http
@@ -9,7 +9,7 @@
     <div class="main">
         <div class="row align-content-center" style="padding-top:70px; padding-bottom:70px">
             <div class="col-md-4 offset-4">
-                <h2 class="h2"><center>Customer Registration</center></h2>
+                <h2 class="h2"><center>Supplier Registration</center></h2>
                 <br />
                 <EditForm Model="@userModel" OnValidSubmit="@HandleValidSubmit">
                     <div class="form-group">
@@ -99,21 +99,22 @@
     {
         if (validPassword && validTP)
         {
+            userModel.UserFlag = 2;
             userModel.UserPass = passVal;
             userModel.ShaEnc();
             var response = await http.PostAsJsonAsync("api/Users", userModel);
             if (response.IsSuccessStatusCode)
             {
-                UriHelper.NavigateTo("login_customer/ /Customer registered!");
+                UriHelper.NavigateTo("login_supplier/ /Supplier registered!");
             }
-            else if(response.StatusCode == System.Net.HttpStatusCode.Conflict)
+            else if (response.StatusCode == System.Net.HttpStatusCode.Conflict)
             {
 
                 SB.Add("This email address already exists. Please use another Email address", Severity.Error);
             }
             else
             {
-                UriHelper.NavigateTo("login_customer/Customer registration faild. Please try again./%20");
+                UriHelper.NavigateTo("login_supplier/Supplier registration faild. Please try again./%20");
             }
         }
         else

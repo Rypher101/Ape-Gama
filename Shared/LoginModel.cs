@@ -7,6 +7,7 @@ namespace ApeGama.Shared
     {
         public string userEmalil { get; set; }
         public string userPassword { get; set; }
+        public int userType { get; set; }
         public void ShaEnc()
         {
             using (SHA256 sha256Hash = SHA256.Create())

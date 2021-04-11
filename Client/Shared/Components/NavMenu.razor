@@ -4,8 +4,6 @@
         <ul>
             <li><a href="/" class="@Home">Home</a></li>
 
-            <li><a href="login_customer" class="@Login">Login</a></li>
-
             <li><a href="menu.html">Menu</a></li>
 
             <li>
@@ -17,6 +15,14 @@
                     <li><a href="testimonials.html">Testimonials</a></li>
                 </ul>
             </li>
+            <li>
+                <a class="dropdown-toggle">Login</a>
+
+                <ul>
+                    <li><a href="/login_customer" class="@LoginCus">As a Customer</a></li>
+                    <li><a href="/login_supplier" class="@LoginSup">As a Supplier</a></li>
+                </ul>
+            </li>
             <li><a href="contact.html">Contact Us</a></li>
         </ul>
     </div><a class="close" href="#menu">Close</a>
@@ -25,7 +31,8 @@
     [Parameter]
     public string NavItem { get; set; }
     public string Home { get; set; }
-    public string Login { get; set; }
+    public string LoginCus { get; set; }
+    public string LoginSup { get; set; }
 
     protected override void OnInitialized()
     {
@@ -34,8 +41,11 @@
             case "HomeNav":
                 Home = "active";
                 break;
-            case "LoginNav":
-                Login = "active";
+            case "LoginCusNav":
+                LoginCus = "active";
+                break;
+            case "LoginSupNav":
+                LoginSup = "active";
                 break;
 
             default:

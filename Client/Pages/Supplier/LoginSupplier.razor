@@ -1,5 +1,5 @@
-﻿@page "/login_customer"
-@page "/login_customer/{ErrorMsg}/{InfoMsg}"
+﻿@page "/login_supplier"
+@page "/login_supplier/{ErrorMsg}/{InfoMsg}"
 @inject NavigationManager UriHelper
 @inject ISnackbar SB
 @inject HttpClient http
@@ -9,7 +9,7 @@
     <div class="main">
         <div class="row align-content-center" style="padding-top:70px; padding-bottom:70px">
             <div class="col-md-4 offset-4">
-                <h2 class="h2"><center>Customer Login</center></h2>
+                <h2 class="h2"><center>Supplier Login</center></h2>
                 <EditForm Model="@loginModel" OnValidSubmit="@HandleValidSubmit">
                     <div class="form-group">
                         <input type="email" class="form-control rounded-left" placeholder="Email" required @bind-value="loginModel.userEmalil">
@@ -27,13 +27,13 @@
                     <h4 class="h4"><center><b>Or</b></center></h4>
                 </div>
                 <br />
-                <button class="primary" style="width:100%" @onclick="@(()=>UriHelper.NavigateTo("register_customer", forceLoad: true))">Sign Up</button>
+                <button class="primary" style="width:100%" @onclick="@(()=>UriHelper.NavigateTo("register_supplier", forceLoad: true))">Sign Up</button>
             </div>
         </div>
     </div>
     <HomeFooter></HomeFooter>
 </div>
-<NavMenu NavItem="LoginCusNav" />
+<NavMenu NavItem="LoginSupNav" />
 @code {
     [Parameter]
     public string ErrorMsg { get; set; }
@@ -60,7 +60,7 @@
         loginModel.userPassword = passVal;
         loginModel.ShaEnc();
 
-        var response = await http.PostAsJsonAsync("api/Login/1", loginModel);
+        var response = await http.PostAsJsonAsync("api/Login/2", loginModel);
         if (response.IsSuccessStatusCode)
         {
             SB.Add("Logged in", Severity.Success);
