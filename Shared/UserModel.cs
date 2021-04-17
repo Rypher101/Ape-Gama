@@ -9,12 +9,12 @@ using System.Text;
 namespace ApeGama.Shared
 {
     [Table("User")]
-    public partial class User
+    public partial class UserModel
     {
-        public User()
+        public UserModel()
         {
-            OnlineShops = new HashSet<OnlineShop>();
-            Orders = new HashSet<Order>();
+            OnlineShops = new HashSet<OnlineShopModel>();
+            Orders = new HashSet<OrderModel>();
         }
 
         [Key]
@@ -46,10 +46,10 @@ namespace ApeGama.Shared
         [Column("user_status")]
         public bool? UserStatus { get; set; } = true;
 
-        [InverseProperty(nameof(OnlineShop.Sup))]
-        public virtual ICollection<OnlineShop> OnlineShops { get; set; }
-        [InverseProperty(nameof(Order.Cus))]
-        public virtual ICollection<Order> Orders { get; set; }
+        [InverseProperty(nameof(OnlineShopModel.Sup))]
+        public virtual ICollection<OnlineShopModel> OnlineShops { get; set; }
+        [InverseProperty(nameof(OrderModel.Cus))]
+        public virtual ICollection<OrderModel> Orders { get; set; }
 
         public void ShaEnc()
         {

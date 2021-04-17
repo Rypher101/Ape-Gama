@@ -28,7 +28,7 @@ namespace ApeGama.Client.Services
                     identity = new ClaimsIdentity(new[] {
                         new Claim(ClaimTypes.Name, model.userName),
                         new Claim(ClaimTypes.Email, model.userEmail),
-                        new Claim(ClaimTypes.Role, "C")
+                        new Claim(ClaimTypes.Role, "Customer")
                     },"Customer");
                 }
                 else
@@ -36,7 +36,7 @@ namespace ApeGama.Client.Services
                     identity = new ClaimsIdentity(new[] {
                         new Claim(ClaimTypes.Name, model.userName),
                         new Claim(ClaimTypes.Email, model.userEmail),
-                        new Claim(ClaimTypes.Role, "S")
+                        new Claim(ClaimTypes.Role, "Supplier")
                     }, "Supplier");
                 }
                 state = new AuthenticationState(new ClaimsPrincipal(identity));

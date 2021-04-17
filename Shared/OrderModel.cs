@@ -8,11 +8,11 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace ApeGama.Shared
 {
     [Table("Order")]
-    public partial class Order
+    public partial class OrderModel
     {
-        public Order()
+        public OrderModel()
         {
-            OrderProducts = new HashSet<OrderProduct>();
+            OrderProducts = new HashSet<OrderProductModel>();
         }
 
         [Key]
@@ -30,12 +30,12 @@ namespace ApeGama.Shared
         public decimal OrderStatus { get; set; }
 
         [ForeignKey(nameof(CusId))]
-        [InverseProperty(nameof(User.Orders))]
-        public virtual User Cus { get; set; }
+        [InverseProperty(nameof(UserModel.Orders))]
+        public virtual UserModel Cus { get; set; }
         [ForeignKey(nameof(ShopId))]
-        [InverseProperty(nameof(OnlineShop.Orders))]
-        public virtual OnlineShop Shop { get; set; }
-        [InverseProperty(nameof(OrderProduct.Order))]
-        public virtual ICollection<OrderProduct> OrderProducts { get; set; }
+        [InverseProperty(nameof(OnlineShopModel.Orders))]
+        public virtual OnlineShopModel Shop { get; set; }
+        [InverseProperty(nameof(OrderProductModel.Order))]
+        public virtual ICollection<OrderProductModel> OrderProducts { get; set; }
     }
 }

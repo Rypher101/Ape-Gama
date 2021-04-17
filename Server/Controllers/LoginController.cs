@@ -3,6 +3,7 @@ using ApeGama.Shared;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace ApeGama.Server.Controllers
@@ -11,26 +12,26 @@ namespace ApeGama.Server.Controllers
     [ApiController]
     public class LoginController : ControllerBase
     {
-        private readonly ApeGamaContext context;
+        private readonly ApeGamaContext _context;
 
         public LoginController(ApeGamaContext context)
         {
-            this.context = context;
+            _context = context;
         }
 
         //POST: api/Login/1
         [HttpPost("{type}")]
-        public async Task<IActionResult> PostLogin(LoginModel loginModel, int type=0)
+        public async Task<IActionResult> PostLogin(LoginModel loginModel, int type = 0)
         {
-            var user = new User();
+            var user = new UserModel();
             switch (type)
             {
                 case 0:
                     return NotFound();
-                    
+
                 case 1:
-                    user = await context.Users.FirstOrDefaultAsync(x=>x.UserEmail == loginModel.userEmail && x.UserPass == loginModel.userPassword && x.UserFlag == 1);
-                    if(user == null)
+                    user = await _context.Users.FirstOrDefaultAsync(x => x.UserEmail == loginModel.userEmail && x.UserPass == loginModel.userPassword && x.UserFlag == 1);
+                    if (user == null)
                     {
                         return NotFound();
                     }
@@ -43,7 +44,9 @@ namespace ApeGama.Server.Controllers
                         return Ok();
                     }
                 case 2:
-                    user = await context.Users.FirstOrDefaultAsync(x => x.UserEmail == loginModel.userEmail && x.UserPass == loginModel.userPassword && x.UserFlag == 2);
+                    user = await _context.Users
+                        .Include("OnlineShops")
+                        .FirstOrDefaultAsync(x => x.UserEmail == loginModel.userEmail && x.UserPass == loginModel.userPassword && x.UserFlag == 2);
                     if (user == null)
                     {
                         return NotFound();
@@ -54,6 +57,7 @@ namespace ApeGama.Server.Controllers
                         HttpContext.Session.SetString("UName", user.UserName);
                         HttpContext.Session.SetString("UEmail", user.UserEmail);
                         HttpContext.Session.SetInt32("URole", 2);
+                        HttpContext.Session.SetInt32("ShopID", user.OnlineShops.Count > 0 ? user.OnlineShops.First().ShopId : 0);
                         return Ok();
                     }
                 default:
@@ -80,6 +84,19 @@ namespace ApeGama.Server.Controllers
             }
 
             return loginModel;
+        }
+
+        [HttpGet("isShopAvailable")]
+        public IActionResult IsShopAvailable()
+        {
+            if (HttpContext.Session.TryGetValue("ShopID", out byte[] _))
+            {
+                return Ok();
+            }
+            else
+            {
+                return NotFound();
+            }
         }
     }
 }

@@ -7,9 +7,13 @@
         <h2>Menu</h2>
         <ul>
             <li><a href="/" class="@Home">Home</a></li>
-
-            <li><a href="menu.html">Menu</a></li>
-
+            <AuthorizeView Roles="Supplier">
+                <Authorized>
+                    <li style="display:@oldShop"><a href="/online_shop" class="@OnlineShop">Online Shop</a></li>
+                    <li style="display:@newShop"><a href="/create_online_shop" class="@OnlineShop">Create New Online Shop</a></li>
+                </Authorized>
+            </AuthorizeView>
+            
             <AuthorizeView>
                 <Authorized>
                     <li><a @onclick="LogOut" href="">Logout</a></li>
@@ -25,7 +29,6 @@
                     </li>
                 </NotAuthorized>
             </AuthorizeView>
-            <li><a href="contact.html">Contact Us</a></li>
         </ul>
     </div><a class="close" href="#menu">Close</a>
 </nav>
@@ -35,8 +38,10 @@
     public string Home { get; set; }
     public string LoginCus { get; set; }
     public string LoginSup { get; set; }
+    public string OnlineShop { get; set; }
+    private string newShop="none", oldShop="none";
 
-    protected override void OnInitialized()
+    protected override async void OnInitialized()
     {
         switch (NavItem)
         {
@@ -49,10 +54,26 @@
             case "LoginSupNav":
                 LoginSup = "active";
                 break;
+            case "OnlineShopNav":
+                OnlineShop = "active";
+                break;
 
             default:
                 break;
         }
+
+        var response = await Http.GetAsync("api/Login/isShopAvailable");
+        if (response.IsSuccessStatusCode)
+        {
+            oldShop = "";
+            newShop = "none";
+        }
+        else
+        {
+            oldShop = "none";
+            newShop = "";
+        }
+
         base.OnInitialized();
     }
 

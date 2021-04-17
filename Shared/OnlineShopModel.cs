@@ -7,12 +7,12 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace ApeGama.Shared
 {
     [Table("Online_Shop")]
-    public partial class OnlineShop
+    public partial class OnlineShopModel
     {
-        public OnlineShop()
+        public OnlineShopModel()
         {
-            Orders = new HashSet<Order>();
-            Products = new HashSet<Product>();
+            Orders = new HashSet<OrderModel>();
+            Products = new HashSet<ProductModel>();
         }
 
         [Key]
@@ -26,17 +26,18 @@ namespace ApeGama.Shared
         [Column("shop_address")]
         [StringLength(100)]
         public string ShopAddress { get; set; }
-        [Column("shop_tp", TypeName = "decimal(10, 0)")]
-        public decimal? ShopTp { get; set; }
+        [Column("shop_tp")]
+        [StringLength(15)]
+        public string ShopTp { get; set; }
         [Column("sup_id")]
         public int SupId { get; set; }
 
         [ForeignKey(nameof(SupId))]
-        [InverseProperty(nameof(User.OnlineShops))]
-        public virtual User Sup { get; set; }
-        [InverseProperty(nameof(Order.Shop))]
-        public virtual ICollection<Order> Orders { get; set; }
-        [InverseProperty(nameof(Product.Shop))]
-        public virtual ICollection<Product> Products { get; set; }
+        [InverseProperty(nameof(UserModel.OnlineShops))]
+        public virtual UserModel Sup { get; set; }
+        [InverseProperty(nameof(OrderModel.Shop))]
+        public virtual ICollection<OrderModel> Orders { get; set; }
+        [InverseProperty(nameof(ProductModel.Shop))]
+        public virtual ICollection<ProductModel> Products { get; set; }
     }
 }

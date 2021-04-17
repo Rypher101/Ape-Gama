@@ -1,0 +1,107 @@
+﻿@page "/create_online_shop"
+@inject NavigationManager UriHelper
+@inject ISnackbar SB
+@inject HttpClient http
+@inject NavigationManager UriHelper
+
+<div id="wrapper" style="pointer-events:@pointerEvent; opacity:@opacity">
+    <HomeHeader />
+    <div class="main">
+        <div class="row align-content-center" style="padding-top:70px; padding-bottom:70px">
+            <div class="col-md-4 offset-4">
+                <h2 class="h2"><center>Supplier Registration</center></h2>
+                <br />
+                <EditForm Model="@onlineShop" OnValidSubmit="@HandleValidSubmit">
+                    <div class="form-group">
+                        <input type="text" class="form-control rounded-left" placeholder="Shop Name" required @bind-value="onlineShop.ShopName">
+                    </div>
+                    <div class="form-group">
+                        <input type="text" class="form-control rounded-left" placeholder="Shop Address" required @bind-value="onlineShop.ShopAddress">
+                    </div>
+                    <div class="form-group">
+                        <input type="text" class="form-control rounded-left" placeholder="Contact Number" required @bind-value="onlineShop.ShopTp" @onblur="TPCheck">
+                    </div>
+                    <div class="form-group align-items-center">
+                        <div class="justify-content-end">
+                            <button class="primary" style="width:100%">Register</button>
+                        </div>
+                    </div>
+                </EditForm>
+            </div>
+        </div>
+    </div>
+</div>
+<NavMenu NavItem="LoginSupNav" />
+<div style="display:@loadingIcon">
+    <MudProgressCircular Color="Color.Primary" Style="height:70px;width:70px;position:fixed;top:50%;left:50%;" Indeterminate="true" />
+</div>
+
+@code {
+    private bool validTP = false;
+    private string pointerEvent, loadingIcon = "none";
+    private double opacity = 1;
+    private OnlineShopModel onlineShop = new OnlineShopModel();
+
+    void ToSignUp()
+    {
+        UriHelper.NavigateTo("register_customer");
+    }
+
+    private async Task HandleValidSubmit()
+    {
+        if (validTP)
+        {
+            isLoading(true);
+            var response = await http.PostAsJsonAsync("api/OnlineShop", onlineShop);
+            isLoading(false);
+
+            if (response.IsSuccessStatusCode)
+            {
+                SB.Add("created", Severity.Success);
+            }
+            else if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized)
+            {
+                UriHelper.NavigateTo("login_supplier/Authentication faild. Please login again!/%20");
+            }
+            else
+            {
+                SB.Add("Couldn't create online shop. Please try again", Severity.Error);
+            }
+        }
+        else
+        {
+            SB.Add("Invalid contact number", Severity.Error);
+        }
+    }
+
+    void TPCheck()
+    {
+        if (!int.TryParse(onlineShop.ShopTp, out _))
+        {
+            onlineShop.ShopTp = "";
+            SB.Add("Invalid Contact Number", Severity.Error);
+            validTP = false;
+        }
+        else
+        {
+            validTP = true;
+        }
+    }
+
+    void isLoading(bool value)
+    {
+        if (value)
+        {
+            loadingIcon = "";
+            pointerEvent = "none";
+            opacity = 0.25;
+        }
+        else
+        {
+            loadingIcon = "none";
+            pointerEvent = "";
+            opacity = 1;
+        }
+    }
+
+}

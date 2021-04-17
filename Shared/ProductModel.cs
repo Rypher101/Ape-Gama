@@ -7,11 +7,11 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace ApeGama.Shared
 {
     [Table("Product")]
-    public partial class Product
+    public partial class ProductModel
     {
-        public Product()
+        public ProductModel()
         {
-            OrderProducts = new HashSet<OrderProduct>();
+            OrderProducts = new HashSet<OrderProductModel>();
         }
 
         [Key]
@@ -35,9 +35,9 @@ namespace ApeGama.Shared
         public bool? ProdStatus { get; set; }
 
         [ForeignKey(nameof(ShopId))]
-        [InverseProperty(nameof(OnlineShop.Products))]
-        public virtual OnlineShop Shop { get; set; }
-        [InverseProperty(nameof(OrderProduct.Prod))]
-        public virtual ICollection<OrderProduct> OrderProducts { get; set; }
+        [InverseProperty(nameof(OnlineShopModel.Products))]
+        public virtual OnlineShopModel Shop { get; set; }
+        [InverseProperty(nameof(OrderProductModel.Prod))]
+        public virtual ICollection<OrderProductModel> OrderProducts { get; set; }
     }
 }

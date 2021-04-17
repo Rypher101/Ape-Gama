@@ -6,7 +6,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace ApeGama.Shared
 {
     [Table("Order_Product")]
-    public partial class OrderProduct
+    public partial class OrderProductModel
     {
         [Key]
         [Column("order_id")]
@@ -21,9 +21,9 @@ namespace ApeGama.Shared
 
         [ForeignKey(nameof(OrderId))]
         [InverseProperty("OrderProducts")]
-        public virtual Order Order { get; set; }
+        public virtual OrderModel Order { get; set; }
         [ForeignKey(nameof(ProdId))]
-        [InverseProperty(nameof(Product.OrderProducts))]
-        public virtual Product Prod { get; set; }
+        [InverseProperty(nameof(ProductModel.OrderProducts))]
+        public virtual ProductModel Prod { get; set; }
     }
 }
