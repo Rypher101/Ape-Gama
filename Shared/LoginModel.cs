@@ -5,9 +5,11 @@ namespace ApeGama.Shared
 {
     public class LoginModel
     {
-        public string userEmalil { get; set; }
+        public string userEmail { get; set; }
         public string userPassword { get; set; }
         public int userType { get; set; }
+        public string userName { get; set; }
+
         public void ShaEnc()
         {
             using (SHA256 sha256Hash = SHA256.Create())

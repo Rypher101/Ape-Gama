@@ -1,4 +1,8 @@
-﻿<nav id="menu">
+﻿@inject AuthenticationStateProvider AuthStateProvider
+@inject HttpClient Http
+@inject NavigationManager UriHelper
+
+<nav id="menu">
     <div class="inner">
         <h2>Menu</h2>
         <ul>
@@ -6,23 +10,21 @@
 
             <li><a href="menu.html">Menu</a></li>
 
-            <li>
-                <a href="#" class="dropdown-toggle">About</a>
+            <AuthorizeView>
+                <Authorized>
+                    <li><a @onclick="LogOut" href="">Logout</a></li>
+                </Authorized>
+                <NotAuthorized>
+                    <li>
+                        <a class="dropdown-toggle">Login</a>
 
-                <ul>
-                    <li><a href="about.html">About Us</a></li>
-                    <li><a href="blog.html">Blog</a></li>
-                    <li><a href="testimonials.html">Testimonials</a></li>
-                </ul>
-            </li>
-            <li>
-                <a class="dropdown-toggle">Login</a>
-
-                <ul>
-                    <li><a href="/login_customer" class="@LoginCus">As a Customer</a></li>
-                    <li><a href="/login_supplier" class="@LoginSup">As a Supplier</a></li>
-                </ul>
-            </li>
+                        <ul>
+                            <li><a href="/login_customer" class="@LoginCus">As a Customer</a></li>
+                            <li><a href="/login_supplier" class="@LoginSup">As a Supplier</a></li>
+                        </ul>
+                    </li>
+                </NotAuthorized>
+            </AuthorizeView>
             <li><a href="contact.html">Contact Us</a></li>
         </ul>
     </div><a class="close" href="#menu">Close</a>
@@ -52,5 +54,12 @@
                 break;
         }
         base.OnInitialized();
+    }
+
+    void LogOut()
+    {
+        Http.DeleteAsync("api/Login");
+        AuthStateProvider.GetAuthenticationStateAsync();
+        UriHelper.NavigateTo("/");
     }
 }

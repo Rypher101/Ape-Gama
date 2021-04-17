@@ -9,6 +9,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using MudBlazor;
 using MudBlazor.Services;
+using System;
 using System.Linq;
 
 namespace ApeGama.Server
@@ -29,6 +30,14 @@ namespace ApeGama.Server
             services.AddControllersWithViews();
             services.AddRazorPages();
             services.AddDbContext<ApeGamaContext>(options => options.UseSqlServer(Configuration.GetConnectionString("MainDB")));
+            services.AddDistributedMemoryCache();
+
+            services.AddSession(options =>
+            {
+                options.IdleTimeout = TimeSpan.FromMinutes(5);
+                options.Cookie.HttpOnly = true;
+                options.Cookie.IsEssential = true;
+            });
 
         }
 
@@ -52,6 +61,7 @@ namespace ApeGama.Server
             app.UseStaticFiles();
 
             app.UseRouting();
+            app.UseSession();
 
             app.UseEndpoints(endpoints =>
             {

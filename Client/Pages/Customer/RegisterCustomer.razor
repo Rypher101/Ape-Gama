@@ -4,7 +4,7 @@
 @inject HttpClient http
 @inject NavigationManager UriHelper
 
-<div id="wrapper">
+<div id="wrapper" style="pointer-events:@pointerEvent; opacity:@opacity">
     <HomeHeader />
     <div class="main">
         <div class="row align-content-center" style="padding-top:70px; padding-bottom:70px">
@@ -42,12 +42,16 @@
     <HomeFooter></HomeFooter>
 </div>
 <NavMenu NavItem="LoginSupNav" />
+<div style="display:@loadingIcon">
+    <MudProgressCircular Color="Color.Primary" Style="height:70px;width:70px;position:fixed;top:50%;left:50%;" Indeterminate="true" />
+</div>
 
 @code {
     private string pass { get; set; } = "password";
     private string passConf { get; set; } = "password";
     private bool validPassword = false, validTP = false;
-    private string passConfVal, passColor, passValidateMessage, passVal;
+    private string passConfVal, passColor, passVal, pointerEvent, loadingIcon = "none";
+    private double opacity = 1;
     private User userModel = new User();
 
     void ToSignUp()
@@ -101,7 +105,11 @@
         {
             userModel.UserPass = passVal;
             userModel.ShaEnc();
+
+            isLoading(true);
             var response = await http.PostAsJsonAsync("api/Users", userModel);
+            isLoading(false);
+
             if (response.IsSuccessStatusCode)
             {
                 UriHelper.NavigateTo("login_customer/ /Customer registered!");
@@ -138,4 +146,19 @@
         }
     }
 
+    void isLoading(bool value)
+    {
+        if (value)
+        {
+            loadingIcon = "";
+            pointerEvent = "none";
+            opacity = 0.25;
+        }
+        else
+        {
+            loadingIcon = "none";
+            pointerEvent = "";
+            opacity = 1;
+        }
+    }
 }

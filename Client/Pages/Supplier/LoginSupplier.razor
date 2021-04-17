@@ -3,6 +3,7 @@
 @inject NavigationManager UriHelper
 @inject ISnackbar SB
 @inject HttpClient http
+@inject AuthenticationStateProvider AuthStateProvider
 
 <div id="wrapper">
     <HomeHeader />
@@ -12,7 +13,7 @@
                 <h2 class="h2"><center>Supplier Login</center></h2>
                 <EditForm Model="@loginModel" OnValidSubmit="@HandleValidSubmit">
                     <div class="form-group">
-                        <input type="email" class="form-control rounded-left" placeholder="Email" required @bind-value="loginModel.userEmalil">
+                        <input type="email" class="form-control rounded-left" placeholder="Email" required @bind-value="loginModel.userEmail">
                     </div>
                     <div class="form-group">
                         <input type="password" class="form-control rounded-left" placeholder="Password" required @bind-value="passVal">
@@ -27,7 +28,7 @@
                     <h4 class="h4"><center><b>Or</b></center></h4>
                 </div>
                 <br />
-                <button class="primary" style="width:100%" @onclick="@(()=>UriHelper.NavigateTo("register_supplier", forceLoad: true))">Sign Up</button>
+                <button class="primary" style="width:100%" @onclick="@(()=>UriHelper.NavigateTo("/register_supplier", forceLoad: true))">Sign Up</button>
             </div>
         </div>
     </div>
@@ -64,6 +65,7 @@
         if (response.IsSuccessStatusCode)
         {
             SB.Add("Logged in", Severity.Success);
+            await AuthStateProvider.GetAuthenticationStateAsync();
         }
         else
         {
