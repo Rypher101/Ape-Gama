@@ -66,6 +66,15 @@
         {
             SB.Add("Logged in", Severity.Success);
             await AuthStateProvider.GetAuthenticationStateAsync();
+            var newShopResponse = await http.GetAsync("api/Login/1");
+            if (newShopResponse.IsSuccessStatusCode)
+            {
+                UriHelper.NavigateTo("/online_shop");
+            }
+            else
+            {
+                UriHelper.NavigateTo("/create_online_shop");
+            }
         }
         else
         {

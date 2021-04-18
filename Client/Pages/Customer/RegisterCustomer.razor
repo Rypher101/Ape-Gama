@@ -2,7 +2,6 @@
 @inject NavigationManager UriHelper
 @inject ISnackbar SB
 @inject HttpClient http
-@inject NavigationManager UriHelper
 
 <div id="wrapper" style="pointer-events:@pointerEvent; opacity:@opacity">
     <HomeHeader />
@@ -53,11 +52,6 @@
     private string passConfVal, passColor, passVal, pointerEvent, loadingIcon = "none";
     private double opacity = 1;
     private UserModel userModel = new UserModel();
-
-    void ToSignUp()
-    {
-        UriHelper.NavigateTo("register_customer");
-    }
 
     void SetToText(int x)
     {

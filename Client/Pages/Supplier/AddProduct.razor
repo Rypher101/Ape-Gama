@@ -1,0 +1,98 @@
+﻿@inject NavigationManager UriHelper
+@inject ISnackbar SB
+@inject HttpClient http
+
+<div id="wrapper">
+    <div class="main">
+        <div class="row align-content-center" style="padding-top:70px; padding-bottom:70px">
+            <div class="col-md-4 offset-4">
+                <h2 class="h2"><center>New Product</center></h2>
+                <EditForm Model="@productModel" OnValidSubmit="@HandleValidSubmit">
+                    <div class="form-group">
+                        <input type="text" class="form-control rounded-left" placeholder="Product" required @bind-value="productModel.ProdName">
+                    </div>
+                    <div class="form-group">
+                        <input type="text" class="form-control rounded-left" placeholder="Description" required @bind-value="productModel.ProdDescription">
+                    </div>
+                    <div class="form-group">
+                        <input type="text" class="form-control rounded-left" placeholder="Stock" required @bind-value="stock" @onblur="StockCheck">
+                    </div>
+                    <div class="form-group">
+                        <input type="text" class="form-control rounded-left" placeholder="Price Per Unit" required @bind-value="price" @onblur="PriceCheck">
+                    </div>
+                    <div class="form-group align-items-center">
+                        <div class="justify-content-end">
+                            <button class="primary" style="width:45%" @onclick="@(()=>CloseDrawer.InvokeAsync())">Close</button> &nbsp; <button class="primary" style="width:45%">Add Product</button>
+                        </div>
+                    </div>
+                </EditForm>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public EventCallback CloseDrawer { get; set; }
+    [Parameter]
+    public EventCallback RefreshProducts { get; set; }
+    private ProductModel productModel = new ProductModel();
+    private string stock, price;
+    private bool validStock = false, validPrice = false;
+
+
+    protected override void OnInitialized()
+    {
+
+    }
+
+    private async Task HandleValidSubmit()
+    {
+        if (validPrice & validStock)
+        {
+            productModel.ProdStock = int.Parse(stock);
+            productModel.ProdPrice = decimal.Parse(price);
+            productModel.ProdStatus = true;
+
+            var response = await http.PostAsJsonAsync("api/Product", productModel);
+            if (response.IsSuccessStatusCode)
+            {
+                SB.Add("Product Registered!");
+                await RefreshProducts.InvokeAsync();
+            }
+            else
+            {
+                SB.Add("Couldn't Register product");
+            }
+        }
+    }
+
+    void StockCheck()
+    {
+        if (!int.TryParse(stock, out _))
+        {
+            stock = "";
+            SB.Add("Invalid Stock Value", Severity.Error);
+            validStock = false;
+        }
+        else
+        {
+            validStock = true;
+        }
+    }
+
+    void PriceCheck()
+    {
+        if (!decimal.TryParse(price, out _))
+        {
+            price = "";
+            SB.Add("Invalid Price Value", Severity.Error);
+            validPrice = false;
+        }
+        else
+        {
+            validPrice = true;
+        }
+    }
+
+}

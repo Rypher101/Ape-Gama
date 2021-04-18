@@ -10,7 +10,6 @@
             <AuthorizeView Roles="Supplier">
                 <Authorized>
                     <li style="display:@oldShop"><a href="/online_shop" class="@OnlineShop">Online Shop</a></li>
-                    <li style="display:@newShop"><a href="/create_online_shop" class="@OnlineShop">Create New Online Shop</a></li>
                 </Authorized>
             </AuthorizeView>
             
@@ -39,7 +38,7 @@
     public string LoginCus { get; set; }
     public string LoginSup { get; set; }
     public string OnlineShop { get; set; }
-    private string newShop="none", oldShop="none";
+    private string oldShop="none";
 
     protected override async void OnInitialized()
     {
@@ -62,16 +61,14 @@
                 break;
         }
 
-        var response = await Http.GetAsync("api/Login/isShopAvailable");
+        var response = await Http.GetAsync("api/Login/1");
         if (response.IsSuccessStatusCode)
         {
-            oldShop = "";
-            newShop = "none";
+            IsNewShop(false);
         }
         else
         {
-            oldShop = "none";
-            newShop = "";
+            IsNewShop(true);
         }
 
         base.OnInitialized();
@@ -82,5 +79,17 @@
         Http.DeleteAsync("api/Login");
         AuthStateProvider.GetAuthenticationStateAsync();
         UriHelper.NavigateTo("/");
+    }
+
+    public void IsNewShop(bool value)
+    {
+        if (value)
+        {
+            oldShop = "none";
+        }
+        else
+        {
+            oldShop = "";
+        }
     }
 }

@@ -2,14 +2,13 @@
 @inject NavigationManager UriHelper
 @inject ISnackbar SB
 @inject HttpClient http
-@inject NavigationManager UriHelper
 
 <div id="wrapper" style="pointer-events:@pointerEvent; opacity:@opacity">
     <HomeHeader />
     <div class="main">
         <div class="row align-content-center" style="padding-top:70px; padding-bottom:70px">
             <div class="col-md-4 offset-4">
-                <h2 class="h2"><center>Supplier Registration</center></h2>
+                <h2 class="h2"><center>Online Shop Registration</center></h2>
                 <br />
                 <EditForm Model="@onlineShop" OnValidSubmit="@HandleValidSubmit">
                     <div class="form-group">
@@ -31,7 +30,7 @@
         </div>
     </div>
 </div>
-<NavMenu NavItem="LoginSupNav" />
+<NavMenu NavItem="LoginSupNav" @ref="navBar"/>
 <div style="display:@loadingIcon">
     <MudProgressCircular Color="Color.Primary" Style="height:70px;width:70px;position:fixed;top:50%;left:50%;" Indeterminate="true" />
 </div>
@@ -41,6 +40,7 @@
     private string pointerEvent, loadingIcon = "none";
     private double opacity = 1;
     private OnlineShopModel onlineShop = new OnlineShopModel();
+    private NavMenu navBar;
 
     void ToSignUp()
     {
@@ -57,6 +57,7 @@
 
             if (response.IsSuccessStatusCode)
             {
+                navBar.IsNewShop(false);
                 SB.Add("created", Severity.Success);
             }
             else if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized)

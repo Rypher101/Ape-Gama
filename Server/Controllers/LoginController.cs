@@ -23,6 +23,7 @@ namespace ApeGama.Server.Controllers
         [HttpPost("{type}")]
         public async Task<IActionResult> PostLogin(LoginModel loginModel, int type = 0)
         {
+            HttpContext.Session.Clear();
             var user = new UserModel();
             switch (type)
             {
@@ -86,10 +87,21 @@ namespace ApeGama.Server.Controllers
             return loginModel;
         }
 
-        [HttpGet("isShopAvailable")]
-        public IActionResult IsShopAvailable()
+        [HttpGet("{type}")]
+        public IActionResult GetHandler(int type = 0)
         {
-            if (HttpContext.Session.TryGetValue("ShopID", out byte[] _))
+            switch (type)
+            {
+                case 1:
+                    return IsShopAvailable();
+                default:
+                    return NotFound();
+            }
+        }
+
+        private IActionResult IsShopAvailable()
+        {
+            if (HttpContext.Session.TryGetValue("ShopID", out byte[] _) && HttpContext.Session.GetInt32("ShopID")>0)
             {
                 return Ok();
             }
