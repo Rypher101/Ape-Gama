@@ -31,7 +31,7 @@ namespace ApeGama.Server
             services.AddRazorPages();
             services.AddDbContext<ApeGamaContext>(options => options.UseSqlServer(Configuration.GetConnectionString("MainDB")));
             services.AddDistributedMemoryCache();
-
+            services.AddControllers().AddNewtonsoftJson(options => options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore);
             services.AddSession(options =>
             {
                 options.IdleTimeout = TimeSpan.FromMinutes(5);

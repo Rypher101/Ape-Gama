@@ -65,7 +65,6 @@
         var response = await http.PostAsJsonAsync("api/Login/1", loginModel);
         if (response.IsSuccessStatusCode)
         {
-            SB.Add("Logged in", Severity.Success);
             await AuthStateProvider.GetAuthenticationStateAsync();
         }
         else

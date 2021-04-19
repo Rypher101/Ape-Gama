@@ -6,51 +6,36 @@
 <div id="wrapper" style="pointer-events:@pointerEvent; opacity:@opacity">
     <HomeHeader />
     <div class="main">
-        <div class="row align-content-center" style="padding-top:70px; padding-bottom:70px">
-            <div class="col-md-4 offset-4">
-                <h2 class="h2"><center>Supplier Registration</center></h2>
+        <div class="row align-content-center" style="padding-top:10px; padding-left:40px; padding-right:40px">
+            <div class="col-md-12">
+                <h2 class="h2"><center>Products</center></h2> 
                 <br />
-                <MudGrid>
-                    <MudItem>
-                        <MudGrid Spacing="2" Justify="Justify.Center">
-                            <MudItem>
-                                <MudCard Style="width:300px; height:150px;" Elevation="10" @onclick="OpenDrawer">
-                                    <MudCardContent>
-                                        <center><MudText Typo="Typo.h6">Add New Product</MudText></center>
-                                    </MudCardContent>
-                                    <MudCardActions>
-                                        <MudGrid Justify="Justify.Center">
-                                            <MudIcon Icon="@Icons.Material.Filled.Add" Color="Color.Default" Style="height:75px; width:75px" />
-                                        </MudGrid>
-                                    </MudCardActions>
-                                </MudCard>
-                            </MudItem>
-                            <MudItem>
-                                @foreach (var item in products)
-                                {
-                                    <MudCard Elevation="10">
-                                        <MudCardContent>
-                                            <MudText Typo="Typo.h5">@item.ProdName </MudText>
-                                            <MudText Typo="Typo.body2">@item.ProdDescription</MudText>
-                                        </MudCardContent>
-                                        <MudCardActions>
-                                            <MudGrid Justify="Justify.Center">
-                                                <MudIcon Icon="@Icons.Material.Filled.Add" Color="Color.Default" />
-                                            </MudGrid>
-                                        </MudCardActions>
-                                    </MudCard>
-                                }
 
-                            </MudItem>
-                        </MudGrid>
-                    </MudItem>
+                <MudGrid Spacing="2" Justify="Justify.Center">
+                    @foreach (var item in products)
+                    {
+                        string img = imgList[i];
+                        <MudItem>
+                            <MudCard Elevation="10" Style="max-width:300px">
+                                <MudCardMedia Image="@img" Height="200" />
+                                <MudCardContent>
+                                    <MudText Typo="Typo.h5" Style="padding-bottom:10px">@item.ProdName </MudText>
+                                    <MudText Typo="Typo.body2" Style="padding-bottom:10px">@item.ProdDescription</MudText>
+                                    <MudDivider/>
+                                    <MudText Typo="Typo.subtitle2" Style="padding-bottom:10px; padding-top:10px">Stock : @item.ProdStock</MudText>
+                                    <MudText Typo="Typo.subtitle2" Style="padding-bottom:10px">Price : Rs. @item.ProdPrice</MudText>
+                                </MudCardContent>
+                            </MudCard>
+                        </MudItem>
+
+                        i = (i + 1) % 6;
+                    }
                 </MudGrid>
-
             </div>
         </div>
     </div>
 </div>
-<button @onclick="RefreshProducts">refresh</button>
+<MudButton Style="border-radius:100px; bottom:40px; left:40px; position:fixed; " Variant="Variant.Filled" Class="primary" @onclick="OpenDrawer"><MudIcon Icon="@Icons.Material.Filled.Add"></MudIcon></MudButton>
 <NavMenu NavItem="OnlineShopNav" @ref="navBar" />
 <div style="display:@loadingIcon">
     <MudProgressCircular Color="Color.Primary" Style="height:70px;width:70px;position:fixed;top:50%;left:50%;" Indeterminate="true" />
@@ -65,11 +50,19 @@
     private NavMenu navBar;
     private List<ProductModel> products = new List<ProductModel>();
     private bool drawerStatus = false;
+    private int i = 0;
+    private List<string> imgList = new List<string>() {
+        "images/product-1-720x480.jpg",
+        "images/product-2-720x480.jpg",
+        "images/product-3-720x480.jpg",
+        "images/product-4-720x480.jpg",
+        "images/product-5-720x480.jpg",
+        "images/product-6-720x480.jpg"
+    };
 
-    protected override async void OnInitialized()
+    protected override async Task OnInitializedAsync ()
     {
         products = await http.GetFromJsonAsync<List<ProductModel>>("api/Product");
-        base.OnInitialized();
     }
 
     void isLoading(bool value)
@@ -103,6 +96,6 @@
     public async void RefreshProducts()
     {
         products = await http.GetFromJsonAsync<List<ProductModel>>("api/Product");
-        //OpenDrawer();
+        OpenDrawer();
     }
 }

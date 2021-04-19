@@ -7,7 +7,7 @@
         <h2>Menu</h2>
         <ul>
             <li><a href="/" class="@Home">Home</a></li>
-            <AuthorizeView Roles="Supplier">
+            <AuthorizeView>
                 <Authorized>
                     <li style="display:@oldShop"><a href="/online_shop" class="@OnlineShop">Online Shop</a></li>
                 </Authorized>
@@ -40,7 +40,7 @@
     public string OnlineShop { get; set; }
     private string oldShop="none";
 
-    protected override async void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
         switch (NavItem)
         {
@@ -74,10 +74,10 @@
         base.OnInitialized();
     }
 
-    void LogOut()
+    async void LogOut()
     {
-        Http.DeleteAsync("api/Login");
-        AuthStateProvider.GetAuthenticationStateAsync();
+        await Http.DeleteAsync("api/Login");
+        await AuthStateProvider.GetAuthenticationStateAsync();
         UriHelper.NavigateTo("/");
     }
 
