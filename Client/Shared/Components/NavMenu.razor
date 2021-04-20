@@ -7,12 +7,16 @@
         <h2>Menu</h2>
         <ul>
             <li><a href="/" class="@Home">Home</a></li>
-            <AuthorizeView>
+            <AuthorizeView Roles="Supplier">
                 <Authorized>
                     <li style="display:@oldShop"><a href="/online_shop" class="@OnlineShop">Online Shop</a></li>
                 </Authorized>
             </AuthorizeView>
-            
+            <AuthorizeView Roles="Customer">
+                <Authorized>
+                    <li><a href="/marketplace" class="@Marketplace">Marketplace</a></li>
+                </Authorized>
+            </AuthorizeView>
             <AuthorizeView>
                 <Authorized>
                     <li><a @onclick="LogOut" href="">Logout</a></li>
@@ -34,10 +38,7 @@
 @code {
     [Parameter]
     public string NavItem { get; set; }
-    public string Home { get; set; }
-    public string LoginCus { get; set; }
-    public string LoginSup { get; set; }
-    public string OnlineShop { get; set; }
+    public string Home, LoginCus, LoginSup, OnlineShop, Marketplace;
     private string oldShop="none";
 
     protected override async Task OnInitializedAsync()
@@ -56,7 +57,9 @@
             case "OnlineShopNav":
                 OnlineShop = "active";
                 break;
-
+            case "Marketplace":
+                Marketplace = "active";
+                break;
             default:
                 break;
         }

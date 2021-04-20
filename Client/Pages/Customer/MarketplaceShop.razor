@@ -1,4 +1,4 @@
-﻿@page "/online_shop"
+﻿@page "/marketplace_shop/{shopID}"
 @inject NavigationManager UriHelper
 @inject ISnackbar SB
 @inject HttpClient http
@@ -8,14 +8,14 @@
     <div class="main">
         <div class="row align-content-center" style="padding-top:10px; padding-left:40px; padding-right:40px">
             <div class="col-md-12">
-                <h2 class="h2"><center>Products</center></h2> 
+                <h2 class="h2"><center>Marketplace</center></h2>
+                <h2 class="h3"><center>@Shop.ShopName</center></h2>
                 <br />
-
                 <MudGrid Spacing="2" Justify="Justify.Center">
                     @{int i = 0;}
                     @foreach (var item in products)
                     {
-                        string img = imgList[i];
+                        string img = "../" + imgList[i];
                         <MudItem>
                             <MudCard Elevation="10" Style="max-width:300px">
                                 <MudCardMedia Image="@img" Height="200" />
@@ -36,19 +36,17 @@
         </div>
     </div>
 </div>
-<MudButton Style="border-radius:100px; bottom:40px; left:40px; position:fixed; " Variant="Variant.Filled" Class="primary" @onclick="OpenDrawer"><MudIcon Icon="@Icons.Material.Filled.Add"></MudIcon></MudButton>
-<NavMenu NavItem="OnlineShopNav" @ref="navBar" />
+<NavMenu NavItem="OnlineShopNav"/>
 <div style="display:@loadingIcon">
     <MudProgressCircular Color="Color.Primary" Style="height:70px;width:70px;position:fixed;top:50%;left:50%;" Indeterminate="true" />
 </div>
-<MudDrawer @bind-Open="@drawerStatus" Anchor="Anchor.Bottom" DisableOverlay="false" Elevation="10" Variant="@DrawerVariant.Temporary" Style="--mud-drawer-content-height:544px !important">
-    <AddProduct CloseDrawer="OpenDrawer" RefreshProducts="RefreshProducts"></AddProduct>
-</MudDrawer>
 
 @code {
+    [Parameter]
+    public string shopID { get; set; }
     private string pointerEvent, loadingIcon = "none";
     private double opacity = 1;
-    private NavMenu navBar;
+    private OnlineShopModel Shop = new OnlineShopModel();
     private List<ProductModel> products = new List<ProductModel>();
     private bool drawerStatus = false;
     private List<string> imgList = new List<string>() {
@@ -60,9 +58,10 @@
         "images/Product/prod6.jpg"
     };
 
-    protected override async Task OnInitializedAsync ()
+    protected override async Task OnInitializedAsync()
     {
-        products = await http.GetFromJsonAsync<List<ProductModel>>("api/Product/GetProducts");
+        Shop = await http.GetFromJsonAsync<OnlineShopModel>("api/OnlineShop/" + shopID);
+        products = await http.GetFromJsonAsync<List<ProductModel>>("api/Product/GetProductFromShop/" + shopID);
     }
 
     void isLoading(bool value)
@@ -79,23 +78,5 @@
             pointerEvent = "";
             opacity = 1;
         }
-    }
-
-    public void OpenDrawer()
-    {
-        if (drawerStatus)
-        {
-            drawerStatus = false;
-        }
-        else
-        {
-            drawerStatus = true;
-        }
-    }
-
-    public async void RefreshProducts()
-    {
-        products = await http.GetFromJsonAsync<List<ProductModel>>("api/Product/GetProducts");
-        OpenDrawer();
     }
 }

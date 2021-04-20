@@ -26,7 +26,10 @@ namespace ApeGama.Server.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<OnlineShopModel>>> GetOnlineShops()
         {
-            return await _context.OnlineShops.ToListAsync();
+            var shops = await _context.OnlineShops
+                .Include("Sup")
+                .ToListAsync();
+            return shops;
         }
 
         // GET: api/OnlineShop/5

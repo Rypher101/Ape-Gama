@@ -58,7 +58,7 @@
             if (response.IsSuccessStatusCode)
             {
                 navBar.IsNewShop(false);
-                SB.Add("created", Severity.Success);
+                UriHelper.NavigateTo("/online_shop");
             }
             else if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized)
             {

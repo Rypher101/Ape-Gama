@@ -10,7 +10,7 @@ using ApeGama.Shared;
 
 namespace ApeGama.Server.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/[controller]/[action]")]
     [ApiController]
     public class ProductController : ControllerBase
     {
@@ -37,7 +37,19 @@ namespace ApeGama.Server.Controllers
             {
                 throw;
             }
-            
+
+            return products;
+        }
+
+        [HttpGet("{id}")]
+        public async Task<ActionResult<IEnumerable<ProductModel>>> GetProductFromShop(int id)
+        {
+            var products = await _context.Products.Where(x => x.ShopId == id).ToListAsync();
+            if (products == null)
+            {
+                return NotFound();
+            }
+
             return products;
         }
 

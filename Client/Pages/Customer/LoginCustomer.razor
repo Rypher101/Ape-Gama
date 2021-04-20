@@ -66,6 +66,7 @@
         if (response.IsSuccessStatusCode)
         {
             await AuthStateProvider.GetAuthenticationStateAsync();
+            UriHelper.NavigateTo("/marketplace");
         }
         else
         {

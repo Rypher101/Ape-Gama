@@ -50,7 +50,7 @@
             productModel.ProdPrice = decimal.Parse(price);
             productModel.ProdStatus = true;
 
-            var response = await http.PostAsJsonAsync("api/Product", productModel);
+            var response = await http.PostAsJsonAsync("api/Product/PostProductModel", productModel);
             if (response.IsSuccessStatusCode)
             {
                 SB.Add("Product Registered!");

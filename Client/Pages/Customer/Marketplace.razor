@@ -1,0 +1,101 @@
+﻿@page "/marketplace"
+@inject NavigationManager UriHelper
+@inject ISnackbar SB
+@inject HttpClient http
+
+<div id="wrapper" style="pointer-events:@pointerEvent; opacity:@opacity">
+    <HomeHeader />
+    <div class="main">
+        <div class="row align-content-center" style="padding-top:10px; padding-left:40px; padding-right:40px">
+            <div class="col-md-12">
+                <h2 class="h2"><center>Marketplace</center></h2>
+                <br />
+                <MudGrid Spacing="2" Justify="Justify.Center">
+                    @{int i = 0;}
+                    @foreach (var item in shops)
+                    {
+                        string img = imgList[i];
+                        var temp = item.ShopName.Split(" ");
+                        string shortName = temp[0][0] + (temp.Length >1 ? temp[1][0].ToString() : "" );
+                        <MudItem>
+                            <MudCard Elevation="10" Style="height: 300px; width: 320px">
+                                <MudCardHeader>
+                                    <CardHeaderAvatar>
+                                        <MudAvatar Color="Color.Secondary">@shortName.ToUpper()</MudAvatar>
+                                    </CardHeaderAvatar>
+                                    <CardHeaderContent>
+                                        <MudText Typo="Typo.body1">@item.ShopName</MudText>
+                                        <MudText Typo="Typo.body2">By : @item.Sup.UserName</MudText>
+                                    </CardHeaderContent>
+                                    <CardHeaderActions>
+                                        <MudTooltip Text="View Shop">
+                                            <MudIconButton Icon="@Icons.Material.Filled.ArrowForwardIos" Color="Color.Default" @onclick="()=>ViewShop(item.ShopId)" Style="box-shadow:none; height:auto"/>
+                                        </MudTooltip>
+                                    </CardHeaderActions>
+                                </MudCardHeader>
+                                <center><MudCardMedia Image="@img" Style="height:200px; width:300px; background-size: contain" /></center>
+                            </MudCard>
+                        </MudItem>
+
+                        i = (i + 1) % 6;
+                    }
+                </MudGrid>
+            </div>
+        </div>
+    </div>
+</div>
+<MudButton Style="border-radius:100px; bottom:40px; left:40px; position:fixed; " Variant="Variant.Filled" Class="primary" @onclick="OpenDrawer"><MudIcon Icon="@Icons.Material.Filled.Add"></MudIcon></MudButton>
+<NavMenu NavItem="Marketplace" />
+<div style="display:@loadingIcon">
+    <MudProgressCircular Color="Color.Primary" Style="height:70px;width:70px;position:fixed;top:50%;left:50%;" Indeterminate="true" />
+</div>
+
+@code {
+    private string pointerEvent, loadingIcon = "none";
+    private double opacity = 1;
+    private List<OnlineShopModel> shops = new List<OnlineShopModel>();
+    private bool drawerStatus = false;
+    private List<string> imgList = new List<string>() {
+        "images/Shop/shop1.png",
+        "images/Shop/shop2.png",
+        "images/Shop/shop3.png",
+    };
+
+    protected override async Task OnInitializedAsync()
+    {
+        shops = await http.GetFromJsonAsync<List<OnlineShopModel>>("api/OnlineShop");
+    }
+
+    void isLoading(bool value)
+    {
+        if (value)
+        {
+            loadingIcon = "";
+            pointerEvent = "none";
+            opacity = 0.25;
+        }
+        else
+        {
+            loadingIcon = "none";
+            pointerEvent = "";
+            opacity = 1;
+        }
+    }
+
+    public void OpenDrawer()
+    {
+        if (drawerStatus)
+        {
+            drawerStatus = false;
+        }
+        else
+        {
+            drawerStatus = true;
+        }
+    }
+
+    void ViewShop(int shopID)
+    {
+        UriHelper.NavigateTo("/marketplace_shop/" + shopID);
+    }
+}
