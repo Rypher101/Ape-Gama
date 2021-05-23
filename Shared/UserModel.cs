@@ -1,4 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using ApeGama.Shared;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
+using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Security.Cryptography;
@@ -6,15 +9,16 @@ using System.Text;
 
 #nullable disable
 
-namespace ApeGama.Shared
+namespace ApeGama.Server.Models
 {
     [Table("User")]
+    [Microsoft.EntityFrameworkCore.Index(nameof(UserEmail), Name = "IX_User", IsUnique = true)]
     public partial class UserModel
     {
         public UserModel()
         {
-            OnlineShops = new HashSet<OnlineShopModel>();
             Orders = new HashSet<OrderModel>();
+            Reviews = new HashSet<ReviewModel>();
         }
 
         [Key]
@@ -41,15 +45,17 @@ namespace ApeGama.Shared
         [StringLength(30)]
         public string UserEmail { get; set; }
         [Column("user_flag", TypeName = "decimal(2, 0)")]
-        public decimal UserFlag { get; set; } = 1;
+        public decimal UserFlag { get; set; }
         [Required]
         [Column("user_status")]
-        public bool? UserStatus { get; set; } = true;
+        public bool? UserStatus { get; set; }
 
-        [InverseProperty(nameof(OnlineShopModel.Sup))]
-        public virtual ICollection<OnlineShopModel> OnlineShops { get; set; }
+        [InverseProperty("Sup")]
+        public virtual OnlineShopModel OnlineShop { get; set; }
         [InverseProperty(nameof(OrderModel.Cus))]
         public virtual ICollection<OrderModel> Orders { get; set; }
+        [InverseProperty(nameof(ReviewModel.User))]
+        public virtual ICollection<ReviewModel> Reviews { get; set; }
 
         public void ShaEnc()
         {
