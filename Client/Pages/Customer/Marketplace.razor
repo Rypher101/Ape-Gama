@@ -16,7 +16,7 @@
                     {
                         string img = imgList[i];
                         var temp = item.ShopName.Split(" ");
-                        string shortName = temp[0][0] + (temp.Length >1 ? temp[1][0].ToString() : "" );
+                        string shortName = temp[0][0] + (temp.Length > 1 ? temp[1][0].ToString() : "");
                         <MudItem>
                             <MudCard Elevation="10" Style="height: 300px; width: 320px">
                                 <MudCardHeader>
@@ -29,7 +29,7 @@
                                     </CardHeaderContent>
                                     <CardHeaderActions>
                                         <MudTooltip Text="View Shop">
-                                            <MudIconButton Icon="@Icons.Material.Filled.ArrowForwardIos" Color="Color.Default" @onclick="()=>ViewShop(item.ShopId)" Style="box-shadow:none; height:auto"/>
+                                            <MudIconButton Icon="@Icons.Material.Filled.ArrowForwardIos" Color="Color.Default" @onclick="()=>ViewShop(item.ShopId)" Style="box-shadow:none; height:auto" />
                                         </MudTooltip>
                                     </CardHeaderActions>
                                 </MudCardHeader>
@@ -44,7 +44,6 @@
         </div>
     </div>
 </div>
-<MudButton Style="border-radius:100px; bottom:40px; left:40px; position:fixed; " Variant="Variant.Filled" Class="primary" @onclick="OpenDrawer"><MudIcon Icon="@Icons.Material.Filled.Add"></MudIcon></MudButton>
 <NavMenu NavItem="Marketplace" />
 <div style="display:@loadingIcon">
     <MudProgressCircular Color="Color.Primary" Style="height:70px;width:70px;position:fixed;top:50%;left:50%;" Indeterminate="true" />

@@ -33,7 +33,7 @@ namespace ApeGama.Shared
         public int SupId { get; set; }
 
         [ForeignKey(nameof(SupId))]
-        [InverseProperty(nameof(UserModel.OnlineShops))]
+        [InverseProperty(nameof(UserModel.OnlineShop))]
         public virtual UserModel Sup { get; set; }
         [InverseProperty(nameof(OrderModel.Shop))]
         public virtual ICollection<OrderModel> Orders { get; set; }

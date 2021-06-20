@@ -1,9 +1,10 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using ApeGama.Shared;
+using Microsoft.EntityFrameworkCore;
 using System.Configuration;
 
 #nullable disable
 
-namespace ApeGama.Server.Models
+namespace ApeGama.Server.Data
 {
     public partial class ApeGamaContext : DbContext
     {
@@ -16,13 +17,13 @@ namespace ApeGama.Server.Models
         {
         }
 
-        public virtual DbSet<Image> Images { get; set; }
-        public virtual DbSet<OnlineShop> OnlineShops { get; set; }
-        public virtual DbSet<Order> Orders { get; set; }
-        public virtual DbSet<OrderProduct> OrderProducts { get; set; }
-        public virtual DbSet<Product> Products { get; set; }
-        public virtual DbSet<Review> Reviews { get; set; }
-        public virtual DbSet<User> Users { get; set; }
+        public virtual DbSet<ImageModel> Images { get; set; }
+        public virtual DbSet<OnlineShopModel> OnlineShops { get; set; }
+        public virtual DbSet<OrderModel> Orders { get; set; }
+        public virtual DbSet<OrderProductModel> OrderProducts { get; set; }
+        public virtual DbSet<ProductModel> Products { get; set; }
+        public virtual DbSet<ReviewModel> Reviews { get; set; }
+        public virtual DbSet<UserModel> Users { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -37,7 +38,7 @@ namespace ApeGama.Server.Models
         {
             modelBuilder.HasAnnotation("Relational:Collation", "SQL_Latin1_General_CP1_CI_AS");
 
-            modelBuilder.Entity<Image>(entity =>
+            modelBuilder.Entity<ImageModel>(entity =>
             {
                 entity.HasOne(d => d.Prod)
                     .WithMany(p => p.Images)
@@ -46,7 +47,7 @@ namespace ApeGama.Server.Models
                     .HasConstraintName("FK_Image_Product");
             });
 
-            modelBuilder.Entity<OnlineShop>(entity =>
+            modelBuilder.Entity<OnlineShopModel>(entity =>
             {
                 entity.HasKey(e => e.ShopId)
                     .HasName("PK__Online_S__74038772F8BFE59E");
@@ -59,12 +60,12 @@ namespace ApeGama.Server.Models
 
                 entity.HasOne(d => d.Sup)
                     .WithOne(p => p.OnlineShop)
-                    .HasForeignKey<OnlineShop>(d => d.SupId)
+                    .HasForeignKey<OnlineShopModel>(d => d.SupId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("FK_Online_Shop_User");
             });
 
-            modelBuilder.Entity<Order>(entity =>
+            modelBuilder.Entity<OrderModel>(entity =>
             {
                 entity.Property(e => e.OrderStatus).HasDefaultValueSql("((1))");
 
@@ -81,7 +82,7 @@ namespace ApeGama.Server.Models
                     .HasConstraintName("FK_Order_ToTable");
             });
 
-            modelBuilder.Entity<OrderProduct>(entity =>
+            modelBuilder.Entity<OrderProductModel>(entity =>
             {
                 entity.HasKey(e => new { e.OrderId, e.ProdId })
                     .HasName("PK__Order_Pr__46596229BA0BFA21");
@@ -99,7 +100,7 @@ namespace ApeGama.Server.Models
                     .HasConstraintName("FK_Order_product_ToTable_1");
             });
 
-            modelBuilder.Entity<Product>(entity =>
+            modelBuilder.Entity<ProductModel>(entity =>
             {
                 entity.HasKey(e => e.ProdId)
                     .HasName("PK__Product__56958AB2AEA035EF");
@@ -115,7 +116,7 @@ namespace ApeGama.Server.Models
                     .HasConstraintName("FK_Product_ToTable");
             });
 
-            modelBuilder.Entity<Review>(entity =>
+            modelBuilder.Entity<ReviewModel>(entity =>
             {
                 entity.HasKey(e => new { e.ProdId, e.UserId });
 
@@ -134,7 +135,7 @@ namespace ApeGama.Server.Models
                     .HasConstraintName("FK_Review_User");
             });
 
-            modelBuilder.Entity<User>(entity =>
+            modelBuilder.Entity<UserModel>(entity =>
             {
                 entity.Property(e => e.UserAddress).IsUnicode(false);
 

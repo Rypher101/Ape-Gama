@@ -1,12 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using Microsoft.EntityFrameworkCore;
 
 #nullable disable
 
-namespace ApeGama.Server.Models
+namespace ApeGama.Shared
 {
     [Table("Review")]
     public partial class ReviewModel
@@ -23,10 +20,10 @@ namespace ApeGama.Server.Models
         public int? Rate { get; set; }
 
         [ForeignKey(nameof(ProdId))]
-        [InverseProperty(nameof(Product.Reviews))]
-        public virtual Product Prod { get; set; }
+        [InverseProperty(nameof(ProductModel.Reviews))]
+        public virtual ProductModel Prod { get; set; }
         [ForeignKey(nameof(UserId))]
         [InverseProperty("Reviews")]
-        public virtual User User { get; set; }
+        public virtual UserModel User { get; set; }
     }
 }

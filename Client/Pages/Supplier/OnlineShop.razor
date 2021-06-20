@@ -41,10 +41,11 @@
 <div style="display:@loadingIcon">
     <MudProgressCircular Color="Color.Primary" Style="height:70px;width:70px;position:fixed;top:50%;left:50%;" Indeterminate="true" />
 </div>
-<MudDrawer @bind-Open="@drawerStatus" Anchor="Anchor.Bottom" DisableOverlay="false" Elevation="10" Variant="@DrawerVariant.Temporary" Style="--mud-drawer-content-height:544px !important">
-    <AddProduct CloseDrawer="OpenDrawer" RefreshProducts="RefreshProducts"></AddProduct>
-</MudDrawer>
-
+<div style="overflow:auto">
+    <MudDrawer @bind-Open="@drawerStatus" Anchor="Anchor.Bottom" DisableOverlay="false" Elevation="10" Variant="@DrawerVariant.Temporary">
+        <AddProduct CloseDrawer="OpenDrawer" RefreshProducts="RefreshProducts"></AddProduct>
+    </MudDrawer>
+</div>
 @code {
     private string pointerEvent, loadingIcon = "none";
     private double opacity = 1;

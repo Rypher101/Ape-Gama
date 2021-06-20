@@ -1,16 +1,15 @@
-﻿using ApeGama.Shared;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 #nullable disable
 
-namespace ApeGama.Server.Models
+namespace ApeGama.Shared
 {
     [Table("Product")]
-    public partial class Product
+    public partial class ProductModel
     {
-        public Product()
+        public ProductModel()
         {
             Images = new HashSet<ImageModel>();
             OrderProducts = new HashSet<OrderProductModel>();

@@ -1,12 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using Microsoft.EntityFrameworkCore;
 
 #nullable disable
 
-namespace ApeGama.Server.Models
+namespace ApeGama.Shared
 {
     [Table("Image")]
     public partial class ImageModel
@@ -21,7 +18,7 @@ namespace ApeGama.Server.Models
         public string ImgName { get; set; }
 
         [ForeignKey(nameof(ProdId))]
-        [InverseProperty(nameof(Product.Images))]
-        public virtual Product Prod { get; set; }
+        [InverseProperty(nameof(ProductModel.Images))]
+        public virtual ProductModel Prod { get; set; }
     }
 }

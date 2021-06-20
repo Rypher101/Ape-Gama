@@ -45,22 +45,31 @@ namespace ApeGama.Server.Controllers
                         return Ok();
                     }
                 case 2:
-                    user = await _context.Users
-                        .Include("OnlineShops")
+                    try
+                    {
+                        user = await _context.Users
+                        .Include("OnlineShop")
                         .FirstOrDefaultAsync(x => x.UserEmail == loginModel.userEmail && x.UserPass == loginModel.userPassword && x.UserFlag == 2);
-                    if (user == null)
-                    {
-                        return NotFound();
+                        if (user == null)
+                        {
+                            return NotFound();
+                        }
+                        else
+                        {
+                            HttpContext.Session.SetInt32("UID", user.UserId);
+                            HttpContext.Session.SetString("UName", user.UserName);
+                            HttpContext.Session.SetString("UEmail", user.UserEmail);
+                            HttpContext.Session.SetInt32("URole", 2);
+                            HttpContext.Session.SetInt32("ShopID", user.OnlineShop != null ? user.OnlineShop.ShopId : 0);
+                            return Ok();
+                        }
                     }
-                    else
+                    catch (System.Exception)
                     {
-                        HttpContext.Session.SetInt32("UID", user.UserId);
-                        HttpContext.Session.SetString("UName", user.UserName);
-                        HttpContext.Session.SetString("UEmail", user.UserEmail);
-                        HttpContext.Session.SetInt32("URole", 2);
-                        HttpContext.Session.SetInt32("ShopID", user.OnlineShops.Count > 0 ? user.OnlineShops.First().ShopId : 0);
-                        return Ok();
+
+                        throw;
                     }
+                    
                 default:
                     return NotFound();
             }

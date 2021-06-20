@@ -1,11 +1,11 @@
-﻿@inject NavigationManager UriHelper
+﻿@page "/edit_product/{prodID}"
 @inject ISnackbar SB
 @inject HttpClient http
 
 <div id="wrapper">
     <div class="main">
         <div class="row align-content-center" style="padding-top:70px; padding-bottom:70px">
-            <div class="col-md-4 offset-4">
+            <div class="col-md-4 offset-2">
                 <h2 class="h2"><center>New Product</center></h2>
                 <EditForm Model="@productModel" OnValidSubmit="@HandleValidSubmit">
                     <div class="form-group">
@@ -32,15 +32,35 @@
                     </div>
                 </EditForm>
             </div>
-        </div>        
+            <div>
+                <h2 style="padding-top:10px">Images</h2>
+                <InputFile id="fileInput" OnChange="GetFiles" hidden multiple accept=".jpg, .jpeg, .png" />
+                <MudGrid>
+                    <MudItem>
+                        <MudButton Style="height: 100px; width: 100px; word-wrap:break-word" Variant="Variant.Filled" Class="primary" HtmlTag="label" for="fileInput"><MudIcon Icon="@Icons.Material.Filled.Add"></MudIcon></MudButton>
+                    </MudItem>
+                    @foreach (var item in imgList)
+                    {
+                        <MudItem>
+                            <img src="@item.loadedFileUrl" style="max-height:300px; max-width:300px" />
+                            @*<MudButton Style="height:100px; width:100px" OnClick="@(e=>OpenImg(item))">
+                                    <MudCard Elevation="10" Style="min-width:100px">
+                                        <MudCardMedia Image="@item.loadedFileUrl" Height="100" />
+                                    </MudCard>
+                                </MudButton>*@
+                        </MudItem>
+
+                    }
+                </MudGrid>
+            </div>
+        </div>
     </div>
 </div>
 
+
 @code {
     [Parameter]
-    public EventCallback CloseDrawer { get; set; }
-    [Parameter]
-    public EventCallback RefreshProducts { get; set; }
+    public int prodID { get; set; }
     private ProductModel productModel = new ProductModel();
     private string stock, price;
     private bool validStock = false, validPrice = false, overlayVisible = false;
@@ -50,7 +70,8 @@
     private List<imgClass> imgList = new();
     private imgClass selectedImg = null;
 
-    private class imgClass {
+    private class imgClass
+    {
         public int id;
         public IBrowserFile loadedFile;
         public string loadedFileUrl;
@@ -69,7 +90,6 @@
             if (response.IsSuccessStatusCode)
             {
                 SB.Add("Product Registered!");
-                await RefreshProducts.InvokeAsync();
             }
             else
             {
@@ -106,10 +126,45 @@
         }
     }
 
-    void ClearContent() {
+    void ClearContent()
+    {
         productModel.ProdName = "";
         productModel.ProdDescription = "";
         stock = "";
         price = "";
+    }
+
+    private async Task GetFiles(InputFileChangeEventArgs e)
+    {
+        var temp = new imgClass();
+        temp.id = ++idNum;
+        temp.loadedFile = (e.File);
+
+        try
+        {
+            IBrowserFile imgFile = e.File;
+            var buffers = new byte[imgFile.Size];
+            await imgFile.OpenReadStream(maxAllowedSize: 1024 * 1024 * 10).ReadAsync(buffers);
+            string imageType = imgFile.ContentType;
+            temp.loadedFileUrl = $"data:{imageType};base64,{Convert.ToBase64String(buffers)}";
+
+            imgList.Add(temp);
+        }
+        catch (Exception ex)
+        {
+            throw;
+        }
+    }
+
+    void OpenImg(imgClass x)
+    {
+        selectedImg = x;
+        overlayVisible = true;
+    }
+
+    void ToggleOverlay()
+    {
+        selectedImg = null;
+        overlayVisible = false;
     }
 }

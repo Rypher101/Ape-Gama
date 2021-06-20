@@ -1,6 +1,4 @@
-﻿using ApeGama.Shared;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
-using System;
+﻿using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -9,7 +7,7 @@ using System.Text;
 
 #nullable disable
 
-namespace ApeGama.Server.Models
+namespace ApeGama.Shared
 {
     [Table("User")]
     [Microsoft.EntityFrameworkCore.Index(nameof(UserEmail), Name = "IX_User", IsUnique = true)]
