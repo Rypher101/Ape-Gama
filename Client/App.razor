@@ -1,7 +1,14 @@
+@inject NavigationManager UriHelper
+
 <CascadingAuthenticationState>
     <Router AppAssembly="@typeof(Program).Assembly" PreferExactMatches="@true">
+
         <Found Context="routeData">
-            <AuthorizeRouteView RouteData="@routeData" DefaultLayout="@typeof(HomeLayout)" />
+            <AuthorizeRouteView RouteData="@routeData" DefaultLayout="@typeof(HomeLayout)">
+                <NotAuthorized>
+                    @if (true) UriHelper.NavigateTo("not_autherized");
+                </NotAuthorized>
+            </AuthorizeRouteView>
         </Found>
         <NotFound>
             <LayoutView Layout="@typeof(HomeLayout)">
