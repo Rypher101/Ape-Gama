@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Microsoft.AspNetCore.Components.Forms;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 #nullable disable
@@ -10,6 +11,7 @@ namespace ApeGama.Shared
     {
         [Key]
         [Column("img_id")]
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int ImgId { get; set; }
         [Column("prod_id")]
         public int ProdId { get; set; }
@@ -20,5 +22,10 @@ namespace ApeGama.Shared
         [ForeignKey(nameof(ProdId))]
         [InverseProperty(nameof(ProductModel.Images))]
         public virtual ProductModel Prod { get; set; }
+
+        //[NotMapped]
+        //public IBrowserFile File { get; set; }
+        [NotMapped]
+        public string fileString { get; set; }
     }
 }

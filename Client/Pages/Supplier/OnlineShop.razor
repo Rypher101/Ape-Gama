@@ -2,16 +2,18 @@
 @inject NavigationManager UriHelper
 @inject ISnackbar SB
 @inject HttpClient http
+@using Microsoft.AspNetCore.Authorization
+@attribute [Authorize(Roles = "Supplier")]
 
 <div id="wrapper" style="pointer-events:@pointerEvent; opacity:@opacity">
     <HomeHeader />
     <div class="main">
         <div class="row align-content-center" style="padding-top:10px; padding-left:40px; padding-right:40px">
             <div class="col-md-12">
-                <h2 class="h2"><center>Products</center></h2> 
+                <h2 class="h2"><center>Products</center></h2>
                 <br />
 
-                <MudGrid Spacing="2" Justify="Justify.Center">
+                <MudGrid Spacing="2" Justify="Justify.SpaceBetween">
                     @{int i = 0;}
                     @foreach (var item in products)
                     {
@@ -31,11 +33,16 @@
 
                         i = (i + 1) % 6;
                     }
-                </MudGrid> 
+                </MudGrid>
+                <br />
+                <br />
+                <br />
+                <br />
             </div>
         </div>
     </div>
 </div>
+
 <MudButton Style="border-radius:100px; bottom:40px; left:40px; position:fixed; " Variant="Variant.Filled" Class="primary" @onclick="OpenDrawer"><MudIcon Icon="@Icons.Material.Filled.Add"></MudIcon></MudButton>
 <NavMenu NavItem="OnlineShopNav" @ref="navBar" />
 <div style="display:@loadingIcon">
@@ -61,7 +68,7 @@
         "images/Product/prod6.jpg"
     };
 
-    protected override async Task OnInitializedAsync ()
+    protected override async Task OnInitializedAsync()
     {
         products = await http.GetFromJsonAsync<List<ProductModel>>("api/Product/GetProducts");
     }

@@ -32,9 +32,10 @@
                     </div>
                 </EditForm>
             </div>
-        </div>        
+        </div>
     </div>
 </div>
+
 
 @code {
     [Parameter]
@@ -50,7 +51,8 @@
     private List<imgClass> imgList = new();
     private imgClass selectedImg = null;
 
-    private class imgClass {
+    private class imgClass
+    {
         public int id;
         public IBrowserFile loadedFile;
         public string loadedFileUrl;
@@ -69,11 +71,12 @@
             if (response.IsSuccessStatusCode)
             {
                 SB.Add("Product Registered!");
-                await RefreshProducts.InvokeAsync();
+                int prodID = int.Parse(response.Content.ReadAsStringAsync().Result);
+                UriHelper.NavigateTo("/edit_product/" + prodID);
             }
             else
             {
-                SB.Add("Couldn't Register product");
+                SB.Add("Couldn't Register product", Severity.Error);
             }
         }
     }
@@ -106,7 +109,8 @@
         }
     }
 
-    void ClearContent() {
+    void ClearContent()
+    {
         productModel.ProdName = "";
         productModel.ProdDescription = "";
         stock = "";

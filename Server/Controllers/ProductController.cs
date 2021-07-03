@@ -1,12 +1,16 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using ApeGama.Server.Data;
+using ApeGama.Shared;
+using Microsoft.AspNetCore.Components.Forms;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using ApeGama.Server.Data;
-using ApeGama.Shared;
+using System;
+using System.Collections.Generic;
+using System.Drawing;
+using System.IO;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace ApeGama.Server.Controllers
 {
@@ -15,10 +19,12 @@ namespace ApeGama.Server.Controllers
     public class ProductController : ControllerBase
     {
         private readonly ApeGamaContext _context;
+        private readonly IWebHostEnvironment _env;
 
-        public ProductController(ApeGamaContext context)
+        public ProductController(ApeGamaContext context, IWebHostEnvironment env)
         {
             _context = context;
+            _env = env;
         }
 
         // GET: api/Product
@@ -108,13 +114,15 @@ namespace ApeGama.Server.Controllers
                 productModel.ShopId = (int)HttpContext.Session.GetInt32("ShopID");
                 _context.Products.Add(productModel);
                 await _context.SaveChangesAsync();
-                return Ok();
+
+                int newId = _context.Products.Max(e => e.ProdId);
+                return Ok(newId);
             }
             catch (Exception)
             {
                 return BadRequest();
             }
-            
+
         }
 
         // DELETE: api/Product/5
@@ -131,6 +139,62 @@ namespace ApeGama.Server.Controllers
             await _context.SaveChangesAsync();
 
             return NoContent();
+        }
+
+        [HttpPost]
+        public async Task<ActionResult> ProductImageUpload(ImageModel imageModel)
+        {
+            if (imageModel == null)
+            {
+                return NoContent();
+            }
+
+            try
+            {
+                int ShopID = (int)HttpContext.Session.GetInt32("ShopID");
+                if (_context.Products.Any(e => e.ProdId == imageModel.ProdId && e.ShopId == ShopID))
+                {
+                    string path = Path.Combine(_env.ApplicationName , "Uploads", "Products", imageModel.ProdId.ToString());
+                    Directory.CreateDirectory(path);
+
+                    byte[] bytes = Convert.FromBase64String(imageModel.fileString);
+                    Image image;
+                    await using (MemoryStream ms = new MemoryStream(bytes))
+                    {
+                        image = Image.FromStream(ms);
+                    }
+
+                    image.Save(Path.Combine(path, imageModel.ImgName));
+                }
+                else
+                {
+                    return Unauthorized();
+                }
+
+            }
+            catch (Exception)
+            {
+                return NotFound();
+            }
+
+            return Ok();
+        }
+
+        [HttpGet]
+        public async Task<ActionResult<List<ImageModel>>> GetProductImages(int id)
+        {
+            var Images = new List<ImageModel>();
+
+            try
+            {
+                Images = await _context.Images.Where(e => e.ProdId == id).ToListAsync();
+            }
+            catch (Exception)
+            {
+                return NotFound();
+            }
+
+            return Images;
         }
 
         private bool ProductModelExists(int id)
