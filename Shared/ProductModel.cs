@@ -18,6 +18,7 @@ namespace ApeGama.Shared
 
         [Key]
         [Column("prod_id")]
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int ProdId { get; set; }
         [Required]
         [Column("prod_name")]

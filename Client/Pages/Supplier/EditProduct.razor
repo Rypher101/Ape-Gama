@@ -2,7 +2,6 @@
 @inject NavigationManager UriHelper
 @inject ISnackbar SB
 @inject HttpClient http
-@using System.IO
 @*@using Microsoft.AspNetCore.Authorization
     @attribute [Authorize(Roles = "Supplier")]*@
 
@@ -35,10 +34,10 @@
                             @{
                                 int i = 0;
                             }
-                            @foreach (var item in imgList)
+                            @foreach (var item in imgModel)
                             {
                                 <MudItem>
-                                    <img src="@item.loadedFileUrl" style="max-height:300px; max-width:300px; border-radius:5%" @onclick="@(e=>openDrawer(item.id))" />
+                                    <img src="@item.fileString" style="max-height:300px; max-width:300px; border-radius:5%" @onclick="@(e=>openDrawer(item.ImgId))" />
                                 </MudItem>
                                 i++;
                             }
@@ -61,14 +60,14 @@
         <div>
             <div class="row">
                 <div class="col-md-12">
-                    <h2 class="h2"><center>Image Details</center></h2>
+                    <h2 class="h2"><center>Image Settings</center></h2>
                 </div>
             </div>
             <br />
             <div class="row">
                 <div class="col-md-12">
                     <center>
-                        <img src="@imgList[selectedImg].loadedFileUrl" style="max-height:300px; max-width:300px; border-radius:5%" />
+                        <img src="@imgModel.FirstOrDefault(e=>e.ImgId == selectedImg).fileString" style="max-height:300px; max-width:300px; border-radius:5%" />
                     </center>
                 </div>
             </div>
@@ -76,7 +75,7 @@
             <div class="col-md-10 offset-1">
                 <center>
                     <MudTooltip Text="@toolTip" Style="font-size:20px" Placement="Placement.Top">
-                        <MudToggleIconButton Toggled="@imgList[selectedImg].isDP" ToggledChanged="onDPChange"
+                        <MudToggleIconButton Toggled="@imgModel.FirstOrDefault(e=>e.ImgId == selectedImg).isDP" ToggledChanged="onDPChange"
                                              Icon="@Icons.Material.Outlined.ThumbUp" Color="@Color.Error" Title="This is the display image"
                                              ToggledIcon="@Icons.Material.Filled.ThumbUp" ToggledColor="@Color.Success" ToggledTitle="This is not the display image" Style="box-shadow:none;" Size="Size.Large" ToggledSize="Size.Large" />
                     </MudTooltip>
@@ -108,7 +107,8 @@
     private List<IBrowserFile> loadedFiles = new();
     private List<string> loadedFileUrl = new();
     private int idNum = 0, selectedImg = -1;
-    private List<imgClass> imgList = new();
+    //private List<imgClass> imgList = new();
+    private List<ImageModel> imgModel = new();
 
     private class imgClass
     {
@@ -120,9 +120,12 @@
 
     protected override async Task OnInitializedAsync()
     {
+        isLoading(true);
         productModel = await http.GetFromJsonAsync<ProductModel>("api/Product/GetProductModel/" + prodID);
         stock = productModel.ProdStock.ToString();
         price = productModel.ProdPrice.ToString();
+        await GetFiles();
+        isLoading(false);
     }
 
     private async Task HandleValidSubmit()
@@ -181,36 +184,9 @@
         price = "";
     }
 
-    private async Task GetFiles(InputFileChangeEventArgs e)
-    {
-        var temp = new imgClass();
-        temp.id = idNum++;
-        temp.loadedFile = (e.File);
-
-        try
-        {
-            IBrowserFile imgFile = e.File;
-            var buffers = new byte[imgFile.Size];
-            await imgFile.OpenReadStream(maxAllowedSize: 1024 * 1024 * 10).ReadAsync(buffers);
-            string imageType = imgFile.ContentType;
-            temp.loadedFileUrl = $"data:{imageType};base64,{Convert.ToBase64String(buffers)}";
-
-            if (idNum == 1)
-            {
-                temp.isDP = true;
-            }
-
-            //var uploadPath = Path.Combine(env.WebRootPath, "Uploads", productModel.ProdId.ToString());
-            //Directory.CreateDirectory(uploadPath);
-            //await using FileStream fs = new FileStream(uploadPath, FileMode.Create);
-            //await temp.loadedFile.OpenReadStream().CopyToAsync(fs);
-
-            imgList.Add(temp);
-        }
-        catch (Exception ex)
-        {
-            throw;
-        }
+    private async Task GetFiles()
+    {    
+        imgModel = await http.GetFromJsonAsync<List<ImageModel>>("api/Product/GetProductImages/" + prodID);
     }
 
     private async Task UploadFile(InputFileChangeEventArgs e)
@@ -231,6 +207,7 @@
         if (response.IsSuccessStatusCode)
         {
             SB.Add("Image Uploaded");
+            await GetFiles();
         }
         else
         {
@@ -259,9 +236,9 @@
     {
         if (toggled)
         {
-            foreach (var item in imgList)
+            foreach (var item in imgModel)
             {
-                if (item.id == selectedImg)
+                if (item.ImgId == selectedImg)
                 {
                     item.isDP = true;
                     toolTip = "This is already marked as disply picture";
@@ -279,7 +256,7 @@
         if (drawerOpen) drawerOpen = false;
         else drawerOpen = true;
         selectedImg = i;
-        if (imgList[selectedImg].isDP)
+        if (imgModel.FirstOrDefault(e=>e.ImgId == selectedImg).isDP)
         {
             toolTip = "This is already marked as disply picture";
         }

@@ -23,9 +23,9 @@ namespace ApeGama.Shared
         [InverseProperty(nameof(ProductModel.Images))]
         public virtual ProductModel Prod { get; set; }
 
-        //[NotMapped]
-        //public IBrowserFile File { get; set; }
         [NotMapped]
         public string fileString { get; set; }
+        [NotMapped]
+        public bool isDP { get; set; } = false;
     }
 }

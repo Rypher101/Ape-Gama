@@ -1,6 +1,5 @@
 ﻿using ApeGama.Server.Data;
 using ApeGama.Shared;
-using Microsoft.AspNetCore.Components.Forms;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -154,7 +153,8 @@ namespace ApeGama.Server.Controllers
                 int ShopID = (int)HttpContext.Session.GetInt32("ShopID");
                 if (_context.Products.Any(e => e.ProdId == imageModel.ProdId && e.ShopId == ShopID))
                 {
-                    string path = Path.Combine(_env.ApplicationName , "Uploads", "Products", imageModel.ProdId.ToString());
+                    string path = Path.Combine(_env.ContentRootPath, "Uploads", "Products", imageModel.ProdId.ToString())
+                        ;
                     Directory.CreateDirectory(path);
 
                     byte[] bytes = Convert.FromBase64String(imageModel.fileString);
@@ -162,9 +162,44 @@ namespace ApeGama.Server.Controllers
                     await using (MemoryStream ms = new MemoryStream(bytes))
                     {
                         image = Image.FromStream(ms);
+
+                        if (System.IO.File.Exists(Path.Combine(path, imageModel.ImgName)))
+                        {
+                            int i = 1;
+                            while (true)
+                            {
+                                if (System.IO.File.Exists(Path.Combine(path, " (" + i + ")" + imageModel.ImgName)))
+                                {
+                                    i++;
+                                }
+                                else
+                                {
+                                    path = Path.Combine(path, " (" + i + ")" + imageModel.ImgName);
+                                    break;
+                                }
+                            }
+                        }
+
+                        image.Save(path, System.Drawing.Imaging.ImageFormat.Jpeg);
                     }
 
-                    image.Save(Path.Combine(path, imageModel.ImgName));
+                    var product = _context.Products.FirstOrDefault(e => e.ProdId == imageModel.ProdId);
+                    if (string.IsNullOrEmpty(product.ProdDp))
+                    {
+                        product.ProdDp = imageModel.ImgName;
+                        _context.Entry(product).State = EntityState.Modified;
+                    }
+
+                    _context.Images.Add(imageModel);
+                    var response = await _context.SaveChangesAsync();
+                    if (response > 0)
+                    {
+                        return Ok();
+                    }
+                    else
+                    {
+                        return NotFound();
+                    }
                 }
                 else
                 {
@@ -172,22 +207,51 @@ namespace ApeGama.Server.Controllers
                 }
 
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                string x = ex.Message;
                 return NotFound();
             }
-
-            return Ok();
         }
 
-        [HttpGet]
+        [HttpGet("{id}")]
         public async Task<ActionResult<List<ImageModel>>> GetProductImages(int id)
         {
             var Images = new List<ImageModel>();
-
+            int index = 0;
             try
             {
                 Images = await _context.Images.Where(e => e.ProdId == id).ToListAsync();
+                var prod = await _context.Products.FirstOrDefaultAsync(e => e.ProdId == id);
+
+                foreach (var item in Images)
+                {
+                    if (String.Equals(item.ImgName, prod.ProdDp))
+                    {
+                        item.isDP = true;
+                        index = Images.FindIndex(e => e.ImgId == item.ImgId);
+                    }
+
+                    string path = Path.Combine(_env.ContentRootPath, "Uploads", "Products", id.ToString(), item.ImgName);
+
+                    using (Image image = Image.FromFile(path))
+                    {
+
+                        using (MemoryStream ms = new())
+                        {
+                            image.Save(ms, image.RawFormat);
+                            byte[] buffer = ms.ToArray();
+                            item.fileString = $"data:{image.GetType()};base64,{Convert.ToBase64String(buffer)}";
+                        }
+                    }
+                }
+
+                if (index > 0)
+                {
+                    var tempImg1 = Images[0];
+                    Images[0] = Images[index];
+                    Images[index] = tempImg1;
+                }
             }
             catch (Exception)
             {

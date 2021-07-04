@@ -17,6 +17,7 @@ namespace ApeGama.Shared
 
         [Key]
         [Column("shop_id")]
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int ShopId { get; set; }
         [Required]
         [Column("shop_name")]
