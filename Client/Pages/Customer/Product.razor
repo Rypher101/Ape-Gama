@@ -1,0 +1,78 @@
+﻿@page "/view_product/{prodID}"
+@inject NavigationManager UriHelper
+@inject ISnackbar SB
+@inject HttpClient http
+
+<div id="wrapper" style="pointer-events:@pointerEvent; opacity:@opacity">
+    <HomeHeader />
+    <div class="main">
+        <div class="row align-content-center">
+            <div class="col-md-8 offset-2">
+                <h2 class="h2"><center>Product : @productModel.ProdName</center></h2>
+                <br />
+                <br />
+                    <div class="form-group">
+                        <h5 class="h5"><i>Description</i></h5>
+                        <div class="col offset-1"><h6 class="h6"><b>@productModel.ProdDescription</b></h6></div>
+                    </div>
+                    <div class="form-group">
+                        <h5 class="h5"><i>Stock</i></h5>
+                        <div class="col offset-1"><h6 class="h6"><b>@productModel.ProdStock</b></h6></div>
+                    </div>
+                    <div class="form-group">
+                        <h5 class="h5"><i>Price (Rs.)</i></h5>
+                        <div class="col offset-1"><h6 class="h6"><b>@productModel.ProdPrice</b></h6></div>
+                    </div>
+                    <div class="form-group">
+                        <br />
+                        <MudGrid>
+                            @foreach (var item in productModel.Images)
+                            {
+                                <MudItem>
+                                    <img src="@item.fileString" style="max-height:300px; max-width:300px; border-radius:5%" />
+                                </MudItem>
+                            }
+                        </MudGrid>
+                    </div>
+                    <br />
+            </div>
+        </div>
+    </div>
+</div>
+
+<NavMenu/>
+<div style="display:@loadingIcon">
+    <MudProgressCircular Color="Color.Primary" Style="height:70px;width:70px;position:fixed;top:50%;left:50%;" Indeterminate="true"/>
+</div>
+
+@code {
+    [Parameter]
+    public string prodID { get; set; }
+    private ProductModel productModel = new ProductModel();
+    private string stock, price, pointerEvent, loadingIcon = "none";
+    private double opacity = 1;
+
+      void isLoading(bool value)
+    {
+        if (value)
+        {
+            loadingIcon = "";
+            pointerEvent = "none";
+            opacity = 0.25;
+        }
+        else
+        {
+            loadingIcon = "none";
+            pointerEvent = "";
+            opacity = 1;
+        }
+    }
+
+     protected override async Task OnInitializedAsync()
+    {
+        isLoading(true);
+        productModel = await http.GetFromJsonAsync<ProductModel>("api/Product/GetProductModel/" + prodID);
+        isLoading(false);
+    }
+
+}

@@ -27,7 +27,6 @@ namespace ApeGama.Shared
         [Column("user_name")]
         [StringLength(50)]
         public string UserName { get; set; }
-        [Required]
         [Column("user_pass")]
         [StringLength(64)]
         public string UserPass { get; set; }
@@ -56,18 +55,34 @@ namespace ApeGama.Shared
         [InverseProperty(nameof(ReviewModel.User))]
         public virtual ICollection<ReviewModel> Reviews { get; set; }
 
-        public void ShaEnc()
+        public void ShaEnc(bool isNewPass = false)
         {
             using (SHA256 sha256Hash = SHA256.Create())
             {
-                byte[] bytes = sha256Hash.ComputeHash(Encoding.UTF8.GetBytes(UserPass));
                 StringBuilder builder = new StringBuilder();
+                byte[] bytes = sha256Hash.ComputeHash(Encoding.UTF8.GetBytes(UserPass));
                 for (int i = 0; i < bytes.Length; i++)
                 {
                     builder.Append(bytes[i].ToString("x2"));
                 }
                 UserPass = builder.ToString();
+
+                if (isNewPass)
+                {
+                    byte[] bytesNew = sha256Hash.ComputeHash(Encoding.UTF8.GetBytes(OldUserPass));
+                    for (int i = 0; i < bytes.Length; i++)
+                    {
+                        builder.Append(bytes[i].ToString("x2"));
+                    }
+                    OldUserPass = builder.ToString();
+                }
             }
         }
+
+        [NotMapped]
+        public bool passwordChange { get; set; } = false;
+        [NotMapped]
+        public string OldUserPass { get; set; }
+
     }
 }

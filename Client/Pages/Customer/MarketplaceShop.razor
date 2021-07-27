@@ -16,10 +16,9 @@
                     @{int i = 0;}
                     @foreach (var item in products)
                     {
-                        string img = "../" + imgList[i];
                         <MudItem>
                             <MudCard Elevation="10" Style="max-width:300px">
-                                <MudCardMedia Image="@img" Height="200" />
+                                <MudCardMedia Image="@item.fileString" Height="200" />
                                 <MudCardContent>
                                     <MudText Typo="Typo.h5" Style="padding-bottom:10px">@item.ProdName </MudText>
                                     <MudText Typo="Typo.body2" Style="padding-bottom:10px">@item.ProdDescription</MudText>
@@ -27,6 +26,9 @@
                                     <MudText Typo="Typo.subtitle2" Style="padding-bottom:10px; padding-top:10px">Stock : @item.ProdStock</MudText>
                                     <MudText Typo="Typo.subtitle2" Style="padding-bottom:10px">Price : Rs. @item.ProdPrice</MudText>
                                 </MudCardContent>
+                                <MudCardActions Style="align-content:flex-end;">
+                                    <MudButton Variant="Variant.Text" Color="Color.Primary" OnClick="@(e=>ViewProduct(@item.ProdId))" Style="margin-left: auto;margin-right: 0;">Edit</MudButton>
+                                </MudCardActions>
                             </MudCard>
                         </MudItem>
 
@@ -50,19 +52,11 @@
     private OnlineShopModel Shop = new OnlineShopModel();
     private List<ProductModel> products = new List<ProductModel>();
     private bool drawerStatus = false;
-    private List<string> imgList = new List<string>() {
-        "images/Product/prod1.jpg",
-        "images/Product/prod2.jpg",
-        "images/Product/prod3.jpg",
-        "images/Product/prod4.jpeg",
-        "images/Product/prod5.png",
-        "images/Product/prod6.jpg"
-    };
 
     protected override async Task OnInitializedAsync()
     {
         Shop = await http.GetFromJsonAsync<OnlineShopModel>("api/OnlineShop/" + shopID);
-        products = await http.GetFromJsonAsync<List<ProductModel>>("api/Product/GetProductFromShop/" + shopID);
+        products = await http.GetFromJsonAsync<List<ProductModel>>("api/Product/GetProducts/" + shopID);
     }
 
     void isLoading(bool value)
@@ -79,5 +73,10 @@
             pointerEvent = "";
             opacity = 1;
         }
+    }
+
+    void ViewProduct(int id)
+    {
+        UriHelper.NavigateTo("/view_product/" + id);
     }
 }

@@ -27,16 +27,57 @@ namespace ApeGama.Server.Controllers
         }
 
         // GET: api/Product
-        [HttpGet]
-        public async Task<ActionResult<IEnumerable<ProductModel>>> GetProducts()
+        [HttpGet("{id}")]
+        public async Task<ActionResult<IEnumerable<ProductModel>>> GetProducts(int id = -1)
         {
             var products = new List<ProductModel>();
             try
             {
-                products = await _context.Products
-                .Include("Shop")
-                .Where(x => x.Shop.ShopId == HttpContext.Session.GetInt32("ShopID"))
-                .ToListAsync();
+                int shopID;
+
+                if (id == -1)
+                {
+                    shopID = (int)HttpContext.Session.GetInt32("ShopID");
+                }
+                else
+                {
+                    shopID = id;
+                }
+
+                products = await _context.Products.Where(x => x.Shop.ShopId == shopID).ToListAsync();
+
+                foreach (var item in products)
+                {
+                    string path = "";
+                    if (string.IsNullOrWhiteSpace(item.ProdDp))
+                    {
+                        path = Path.Combine(_env.ContentRootPath, "Images", "NoImage.jpg");
+                    }
+                    else
+                    {
+                        path = Path.Combine(_env.ContentRootPath, "Uploads", "Products", item.ProdId.ToString(), item.ProdDp);
+                    }
+
+                    if (System.IO.File.Exists(path))
+                    {
+                        using (Image image = Image.FromFile(path))
+                        {
+                            using (MemoryStream ms = new())
+                            {
+                                image.Save(ms, image.RawFormat);
+                                byte[] buffer = ms.ToArray();
+                                item.fileString = $"data:{image.GetType()};base64,{Convert.ToBase64String(buffer)}";
+                            }
+                        }
+                    }
+                    else
+                    {
+                        item.ProdDp = null;
+                        _context.Entry(item).State = EntityState.Modified;
+                        await _context.SaveChangesAsync();
+                    }
+
+                }
             }
             catch (Exception)
             {
@@ -62,13 +103,63 @@ namespace ApeGama.Server.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<ProductModel>> GetProductModel(int id)
         {
-            var productModel = await _context.Products.FindAsync(id);
+            int index = 0;
+            var removeList = new List<ImageModel>();
+            var productModel = await _context.Products.Include(e=>e.Images).FirstOrDefaultAsync(e=>e.ProdId == id);
 
             if (productModel == null)
             {
                 return NotFound();
             }
 
+            productModel.ImageList = productModel.Images.ToList();
+            productModel.Images = null;
+
+            try
+            {
+                foreach (var item in productModel.ImageList)
+                {
+                    if (String.Equals(item.ImgName, productModel.ProdDp))
+                    {
+                        item.isDP = true;
+                        index = productModel.ImageList.IndexOf(item);
+                    }
+                    string path = Path.Combine(_env.ContentRootPath, "Uploads", "Products", id.ToString(), item.ImgName);
+
+                    if (System.IO.File.Exists(path))
+                    {
+                        using (Image image = Image.FromFile(path))
+                        {
+
+                            using (MemoryStream ms = new())
+                            {
+                                image.Save(ms, image.RawFormat);
+                                byte[] buffer = ms.ToArray();
+                                item.fileString = $"data:{image.GetType()};base64,{Convert.ToBase64String(buffer)}";
+                            }
+                        }
+                    }
+                }
+
+                foreach (var item in removeList)
+                {
+                    productModel.Images.Remove(item);
+                    _context.Remove(item);
+                    await _context.SaveChangesAsync();
+                }
+
+                if (index > 0)
+                {
+                    var tempImg1 = productModel.ImageList[0];
+                    productModel.ImageList[0] = productModel.ImageList[index];
+                    productModel.ImageList[index] = tempImg1;
+                }
+            }
+            catch (Exception ex)
+            {
+                productModel.fileString = ex.Message;
+                return productModel;
+            }
             return productModel;
         }
 
@@ -153,8 +244,7 @@ namespace ApeGama.Server.Controllers
                 int ShopID = (int)HttpContext.Session.GetInt32("ShopID");
                 if (_context.Products.Any(e => e.ProdId == imageModel.ProdId && e.ShopId == ShopID))
                 {
-                    string path = Path.Combine(_env.ContentRootPath, "Uploads", "Products", imageModel.ProdId.ToString())
-                        ;
+                    string path = Path.Combine(_env.ContentRootPath, "Uploads", "Products", imageModel.ProdId.ToString());
                     Directory.CreateDirectory(path);
 
                     byte[] bytes = Convert.FromBase64String(imageModel.fileString);
@@ -178,6 +268,10 @@ namespace ApeGama.Server.Controllers
                                     break;
                                 }
                             }
+                        }
+                        else
+                        {
+                            path = Path.Combine(path, imageModel.ImgName);
                         }
 
                         image.Save(path, System.Drawing.Imaging.ImageFormat.Jpeg);
@@ -218,6 +312,7 @@ namespace ApeGama.Server.Controllers
         public async Task<ActionResult<List<ImageModel>>> GetProductImages(int id)
         {
             var Images = new List<ImageModel>();
+            var removeList = new List<ImageModel>();
             int index = 0;
             try
             {
@@ -234,16 +329,30 @@ namespace ApeGama.Server.Controllers
 
                     string path = Path.Combine(_env.ContentRootPath, "Uploads", "Products", id.ToString(), item.ImgName);
 
-                    using (Image image = Image.FromFile(path))
+                    if (System.IO.File.Exists(path))
                     {
-
-                        using (MemoryStream ms = new())
+                        using (Image image = Image.FromFile(path))
                         {
-                            image.Save(ms, image.RawFormat);
-                            byte[] buffer = ms.ToArray();
-                            item.fileString = $"data:{image.GetType()};base64,{Convert.ToBase64String(buffer)}";
+
+                            using (MemoryStream ms = new())
+                            {
+                                image.Save(ms, image.RawFormat);
+                                byte[] buffer = ms.ToArray();
+                                item.fileString = $"data:{image.GetType()};base64,{Convert.ToBase64String(buffer)}";
+                            }
                         }
                     }
+                    else
+                    {
+                        removeList.Add(item);
+                    }
+                }
+
+                foreach (var item in removeList)
+                {
+                    Images.Remove(item);
+                    _context.Remove(item);
+                    await _context.SaveChangesAsync();
                 }
 
                 if (index > 0)
@@ -259,6 +368,73 @@ namespace ApeGama.Server.Controllers
             }
 
             return Images;
+        }
+
+        [HttpPost]
+        public async Task<ActionResult> ChangeDP(ImageModel img)
+        {
+            if (!string.IsNullOrWhiteSpace(img.ImgName) && img.ProdId != -1)
+            {
+                var prod = await _context.Products.FirstOrDefaultAsync(e => e.ProdId == img.ProdId);
+                if (prod == null) return NotFound();
+
+                prod.ProdDp = img.ImgName;
+                _context.Entry(prod).State = EntityState.Modified;
+                await _context.SaveChangesAsync();
+            }
+            else
+            {
+                return NotFound();
+            }
+
+            return Ok();
+        }
+
+        [HttpPost]
+        public async Task<ActionResult> DeleteImage(ImageModel imgModel)
+        {
+            if (imgModel == null)
+            {
+                return NotFound();
+            }
+
+
+            try
+            {
+                _context.Images.Remove(imgModel);
+                if (imgModel.isDP)
+                {
+                    var tempImg = await _context.Images.AsNoTracking().FirstOrDefaultAsync(e => e.ImgId != imgModel.ImgId && e.ProdId == imgModel.ProdId);
+                    var prod = await _context.Products.FindAsync(imgModel.ProdId);
+
+                    if (tempImg != null)
+                    {
+                        prod.ProdDp = tempImg.ImgName;
+                    }
+                    else
+                    {
+                        prod.ProdDp = null;
+                    }
+
+                    _context.Entry(prod).State = EntityState.Modified;
+                    await _context.SaveChangesAsync();
+                }
+
+
+                //await _context.SaveChangesAsync();
+
+                string path = Path.Combine(_env.ContentRootPath, "Uploads", "Products", imgModel.ProdId.ToString(), imgModel.ImgName);
+                if (System.IO.File.Exists(path))
+                {
+                    System.IO.File.Delete(path);
+                }
+            }
+            catch (Exception)
+            {
+                return NotFound();
+            }
+
+            return Ok();
         }
 
         private bool ProductModelExists(int id)

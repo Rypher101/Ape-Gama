@@ -1,16 +1,16 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using ApeGama.Server.Data;
+using ApeGama.Shared;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using ApeGama.Server.Data;
-using ApeGama.Shared;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace ApeGama.Server.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/[controller]/[action]")]
     [ApiController]
     public class UsersController : ControllerBase
     {
@@ -28,31 +28,52 @@ namespace ApeGama.Server.Controllers
             return await _context.Users.ToListAsync();
         }
 
-        // GET: api/Users/5
-        [HttpGet("{id}")]
-        public async Task<ActionResult<UserModel>> GetUser(int id)
+        // GET: api/Users
+        [HttpGet]
+        public async Task<ActionResult<UserModel>> GetUser()
         {
-            var user = await _context.Users.FindAsync(id);
-
-            if (user == null)
+            UserModel user = new();
+            try
             {
-                return NotFound();
-            }
+                if (HttpContext.Session.GetInt32("UID") != null)
+                {
+                    user = await _context.Users.FindAsync(HttpContext.Session.GetInt32("UID"));
+                    if (!string.IsNullOrWhiteSpace(user.UserPass))
+                        user.UserPass = "";
+                    return user;
+                }
+                else
+                {
+                    return user;
 
-            return user;
+                }
+            }
+            catch (Exception)
+            {
+                return user;
+            }
         }
 
         // PUT: api/Users/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutUser(int id, UserModel user)
+        [HttpPut]
+        public async Task<IActionResult> PutUser(UserModel user)
         {
-            if (id != user.UserId)
+            var entity = _context.Users.Attach(user);
+            entity.Property(x => x.UserName).IsModified = true;
+            entity.Property(x => x.UserTp).IsModified = true;
+            entity.Property(x => x.UserEmail).IsModified = true;
+
+            if (user.passwordChange)
             {
-                return BadRequest();
+                var temp = await _context.Users.FirstOrDefaultAsync(e => e.UserId == user.UserId);
+
+                if (string.Equals(temp.UserPass, user.OldUserPass))
+                    entity.Property(x => x.UserPass).IsModified = true;
+                else
+                    return BadRequest();
             }
 
-            _context.Entry(user).State = EntityState.Modified;
 
             try
             {
@@ -60,17 +81,10 @@ namespace ApeGama.Server.Controllers
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!UserExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
+                return NotFound();
             }
 
-            return NoContent();
+            return Ok();
         }
 
         // POST: api/Users
@@ -86,7 +100,7 @@ namespace ApeGama.Server.Controllers
             }
             catch (Exception ex)
             {
-                if(ex.ToString().Contains("UNIQUE KEY"))
+                if (ex.ToString().Contains("UNIQUE KEY"))
                 {
                     return Conflict();
                 }

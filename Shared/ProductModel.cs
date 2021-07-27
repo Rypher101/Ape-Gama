@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System.Collections;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -48,5 +49,10 @@ namespace ApeGama.Shared
         public virtual ICollection<OrderProductModel> OrderProducts { get; set; }
         [InverseProperty(nameof(ReviewModel.Prod))]
         public virtual ICollection<ReviewModel> Reviews { get; set; }
+
+        [NotMapped]
+        public string fileString { get; set; }
+        [NotMapped]
+        public IList<ImageModel> ImageList { get; set; } = new List<ImageModel>();
     }
 }

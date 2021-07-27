@@ -1,5 +1,4 @@
-﻿using Microsoft.AspNetCore.Components.Forms;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 #nullable disable
@@ -14,7 +13,7 @@ namespace ApeGama.Shared
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int ImgId { get; set; }
         [Column("prod_id")]
-        public int ProdId { get; set; }
+        public int ProdId { get; set; } = -1;
         [Required]
         [Column("img_name", TypeName = "text")]
         public string ImgName { get; set; }

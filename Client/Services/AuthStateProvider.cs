@@ -29,7 +29,7 @@ namespace ApeGama.Client.Services
                         new Claim(ClaimTypes.Name, model.userName),
                         new Claim(ClaimTypes.Email, model.userEmail),
                         new Claim(ClaimTypes.Role, "Customer")
-                    },"Customer");
+                    }, "Customer");
                 }
                 else
                 {

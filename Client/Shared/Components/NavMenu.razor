@@ -19,6 +19,7 @@
             </AuthorizeView>
             <AuthorizeView>
                 <Authorized>
+                    <li><a href="/profile" class="@Profile">Profile</a></li>
                     <li><a @onclick="LogOut" href="">Logout</a></li>
                 </Authorized>
                 <NotAuthorized>
@@ -38,7 +39,7 @@
 @code {
     [Parameter]
     public string NavItem { get; set; }
-    public string Home, LoginCus, LoginSup, OnlineShop, Marketplace;
+    public string Home, LoginCus, LoginSup, OnlineShop, Marketplace, Profile;
     private string oldShop="none";
 
     protected override async Task OnInitializedAsync()
@@ -59,6 +60,9 @@
                 break;
             case "Marketplace":
                 Marketplace = "active";
+                break;
+            case "Profile":
+                Profile = "active";
                 break;
             default:
                 break;

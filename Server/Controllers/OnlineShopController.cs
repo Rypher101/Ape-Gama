@@ -1,13 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using ApeGama.Server.Data;
+using ApeGama.Shared;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using ApeGama.Server.Data;
-using ApeGama.Shared;
-using System.ComponentModel;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace ApeGama.Server.Controllers
 {
@@ -96,14 +95,14 @@ namespace ApeGama.Server.Controllers
                 _context.OnlineShops.Add(onlineShopModel);
                 await _context.SaveChangesAsync();
 
-                var newOnlineShop = await _context.OnlineShops.FirstOrDefaultAsync(x=>x.SupId == onlineShopModel.SupId);
+                var newOnlineShop = await _context.OnlineShops.FirstOrDefaultAsync(x => x.SupId == onlineShopModel.SupId);
                 HttpContext.Session.SetInt32("ShopID", newOnlineShop.ShopId);
                 return Ok();
             }
             catch (Exception)
             {
                 return NotFound();
-            }        
+            }
         }
 
         // DELETE: api/OnlineShop/5

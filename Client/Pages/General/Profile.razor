@@ -1,0 +1,156 @@
+﻿@page "/profile"
+@inject NavigationManager UriHelper
+@inject ISnackbar SB
+@inject HttpClient http
+
+<div id="wrapper" style="pointer-events:@pointerEvent; opacity:@opacity">
+    <HomeHeader />
+    <div class="main">
+        <div class="row align-content-center">
+            <div class="col-md-8 offset-2">
+                <h2 class="h2"><center>User Profile</center></h2>
+                <div class="col">
+                    <center><img src="images/Mcs/team.png" /></center>
+                </div>
+                <EditForm Model="@userModel" OnValidSubmit="@HandleValidSubmit">
+                    <div class="form-group">
+                        <h5 class="h5"><i>User Name</i></h5>
+                        <div class="col offset-1"><input type="text" class="form-control rounded-left" placeholder="User Name" required @bind="userModel.UserName"></div>
+                    </div>
+                    <div class="form-group">
+                        <h5 class="h5"><i>Contact Number</i></h5>
+                        <div class="col offset-1"><input type="text" class="form-control rounded-left" placeholder="Contact Number" required @bind-value="@userModel.UserTp" @onblur="tpCheck"></div>
+                    </div>
+                    <div class="form-group">
+                        <h5 class="h5"><i>Email</i></h5>
+                        <div class="col offset-1"><input type="email" class="form-control rounded-left" placeholder="Email" required @bind-value="@userModel.UserEmail"></div>
+                    </div>
+                    <br />
+                    <br />
+                    <h4 class="h4"><b><i>Change Password</i></b></h4>
+                    <div class="form-group">
+                        <div class="col offset-1"><input type="password" class="form-control rounded-left" placeholder="Old Password" @bind="oldPassword" style="color:@clrPassword"></div>
+                        <div class="col offset-1"><input type="password" class="form-control rounded-left" placeholder="New Password" @bind="newPassword" style="color:@clrPassword"></div>
+                        <div class="col offset-1"><input type="password" class="form-control rounded-left" placeholder="Confirm New Password" @bind="confPassword" style="color:@clrPassword"></div>
+                    </div>
+                    <br>
+                    <br>
+                    <div class="form-group align-items-center">
+                        <div class="justify-content-end">
+                            <button class="primary" style="width:100%">Save</button>
+                        </div>
+                    </div>
+                </EditForm>
+            </div>
+        </div>
+    </div>
+</div>
+<NavMenu NavItem="Profile" />
+
+@code {
+    private string pointerEvent, loadingIcon = "none", oldPassword, newPassword, confPassword, originalTP, clrPassword;
+    private double opacity = 1;
+    private UserModel userModel = new();
+
+
+    void isLoading(bool value)
+    {
+        if (value)
+        {
+            loadingIcon = "";
+            pointerEvent = "none";
+            opacity = 0.25;
+        }
+        else
+        {
+            loadingIcon = "none";
+            pointerEvent = "";
+            opacity = 1;
+        }
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        isLoading(true);
+        userModel = await http.GetFromJsonAsync<UserModel>("api/Users/GetUser");
+        if(userModel.UserName == null)
+        {
+            UriHelper.NavigateTo("/not_autherized");
+        }
+        originalTP = userModel.UserTp;
+        
+        isLoading(false);
+    }
+
+    private async Task HandleValidSubmit()
+    {
+        if (CheckPassword())
+        {
+            if (userModel.passwordChange)
+            {
+                userModel.OldUserPass = oldPassword;
+                userModel.UserPass = newPassword;
+                userModel.ShaEnc(true);
+            }
+            
+            var response = await http.PutAsJsonAsync("api/Users/PutUser", userModel);
+
+            if (response.IsSuccessStatusCode)
+            {
+                SB.Add("Profile updated.");
+                oldPassword = "";
+                newPassword = "";
+                confPassword = "";
+            } else if (response.StatusCode == System.Net.HttpStatusCode.BadRequest)
+            {
+                SB.Add("Profile update faild due to incorrect password. Please enter correct password in order to change the password.", Severity.Error);
+            } else 
+            {
+                SB.Add("Profile update faild. Please try again.", Severity.Error);
+            }
+        }
+    }
+
+    void tpCheck()
+    {
+        if(!System.Text.RegularExpressions.Regex.IsMatch(userModel.UserTp, "^[0-9]*$"))
+        {
+            userModel.UserTp = originalTP;
+            SB.Add("Invalid contact number. Please check again", Severity.Error);
+        }
+    }
+
+    bool CheckPassword()
+    {
+        bool passPassword;
+
+        var newPass = string.IsNullOrWhiteSpace(newPassword);
+        var oldPass = string.IsNullOrEmpty(oldPassword);
+        var confPass = string.IsNullOrEmpty(confPassword);
+
+        if(!(newPass | oldPass | confPass) | (newPass & oldPass & confPass))
+        {
+            clrPassword = "";
+            passPassword = true;
+             
+            if (!newPass) userModel.passwordChange = true;
+            else userModel.passwordChange = false;
+        }
+        else
+        {
+            clrPassword = "lightcoral";
+            SB.Add("All the password fields must be filled before changing the password. Otherwise please remove the remaining values from password fiels.", Severity.Error);
+            passPassword = false;
+        }
+        
+        if((!newPass && !confPass) && (!string.Equals(newPassword,confPassword)))
+        {
+            clrPassword = "lightcoral";
+            SB.Add("New password and confirm password is not equal. Please check the new password again.", Severity.Error);
+            passPassword = false;
+        }
+
+        return passPassword;
+
+    }
+}

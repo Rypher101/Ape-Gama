@@ -3,7 +3,6 @@ using ApeGama.Shared;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace ApeGama.Server.Controllers
@@ -69,7 +68,7 @@ namespace ApeGama.Server.Controllers
 
                         throw;
                     }
-                    
+
                 default:
                     return NotFound();
             }
@@ -110,7 +109,7 @@ namespace ApeGama.Server.Controllers
 
         private IActionResult IsShopAvailable()
         {
-            if (HttpContext.Session.TryGetValue("ShopID", out byte[] _) && HttpContext.Session.GetInt32("ShopID")>0)
+            if (HttpContext.Session.TryGetValue("ShopID", out byte[] _) && HttpContext.Session.GetInt32("ShopID") > 0)
             {
                 return Ok();
             }

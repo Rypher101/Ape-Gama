@@ -101,7 +101,7 @@
             userModel.ShaEnc();
 
             isLoading(true);
-            var response = await http.PostAsJsonAsync("api/Users", userModel);
+            var response = await http.PostAsJsonAsync("api/Users/PostUser", userModel);
             isLoading(false);
 
             if (response.IsSuccessStatusCode)

@@ -2,8 +2,10 @@
 @inject NavigationManager UriHelper
 @inject ISnackbar SB
 @inject HttpClient http
-@*@using Microsoft.AspNetCore.Authorization
-    @attribute [Authorize(Roles = "Supplier")]*@
+@using Microsoft.AspNetCore.Authorization
+@attribute [Authorize(Roles = "Supplier")]
+@inject IDialogService DS
+
 
 <div id="wrapper" style="pointer-events:@pointerEvent; opacity:@opacity">
     <HomeHeader />
@@ -13,16 +15,20 @@
                 <h2 class="h2"><center>Edit Product</center></h2>
                 <EditForm Model="@productModel" OnValidSubmit="@HandleValidSubmit">
                     <div class="form-group">
-                        <input type="text" class="form-control rounded-left" placeholder="Product" required @bind="productModel.ProdName">
+                        <h5 class="h5"><i>Product Name</i></h5>
+                        <div class="col offset-1"><input type="text" class="form-control rounded-left" placeholder="Product" required @bind="productModel.ProdName"></div>
                     </div>
                     <div class="form-group">
-                        <input type="text" class="form-control rounded-left" placeholder="Description" required @bind="productModel.ProdDescription">
+                        <h5 class="h5"><i>Description</i></h5>
+                        <div class="col offset-1"><MudTextField T="string" Variant="Variant.Text" Text="@productModel.ProdDescription" Lines="2" /></div>
                     </div>
                     <div class="form-group">
-                        <input type="text" class="form-control rounded-left" placeholder="Stock" required @bind-value="stock" @onblur="StockCheck">
+                        <h5 class="h5"><i>Stock</i></h5>
+                        <div class="col offset-1"><input type="text" class="form-control rounded-left" placeholder="Stock" required @bind-value="stock" @onblur="StockCheck"></div>
                     </div>
                     <div class="form-group">
-                        <input type="text" class="form-control rounded-left" placeholder="Price Per Unit" required @bind-value="price" @onblur="PriceCheck">
+                        <h5 class="h5"><i>Price (Rs.)</i></h5>
+                        <div class="col offset-1"><input type="text" class="form-control rounded-left" placeholder="Price Per Unit" required @bind-value="price" @onblur="PriceCheck"></div>
                     </div>
                     <div class="form-group">
                         <br />
@@ -34,7 +40,7 @@
                             @{
                                 int i = 0;
                             }
-                            @foreach (var item in imgModel)
+                            @foreach (var item in productModel.ImageList)
                             {
                                 <MudItem>
                                     <img src="@item.fileString" style="max-height:300px; max-width:300px; border-radius:5%" @onclick="@(e=>openDrawer(item.ImgId))" />
@@ -54,7 +60,7 @@
         </div>
     </div>
 </div>
-<MudDrawer @bind-Open="@drawerOpen" Anchor="Anchor.Left" Elevation="1" Variant="@DrawerVariant.Temporary" Width="500px">
+<MudDrawer @bind-Open="@drawerOpen" Anchor="Anchor.Left" Elevation="1" Variant="@DrawerVariant.Temporary" Width="500px" ZIndex="200">
     @if (selectedImg != -1)
     {<br />
         <div>
@@ -67,7 +73,7 @@
             <div class="row">
                 <div class="col-md-12">
                     <center>
-                        <img src="@imgModel.FirstOrDefault(e=>e.ImgId == selectedImg).fileString" style="max-height:300px; max-width:300px; border-radius:5%" />
+                        <img src="@productModel.ImageList.FirstOrDefault(e=>e.ImgId == selectedImg).fileString" style="max-height:300px; max-width:300px; border-radius:5%" />
                     </center>
                 </div>
             </div>
@@ -75,7 +81,7 @@
             <div class="col-md-10 offset-1">
                 <center>
                     <MudTooltip Text="@toolTip" Style="font-size:20px" Placement="Placement.Top">
-                        <MudToggleIconButton Toggled="@imgModel.FirstOrDefault(e=>e.ImgId == selectedImg).isDP" ToggledChanged="onDPChange"
+                        <MudToggleIconButton Toggled="@productModel.ImageList.FirstOrDefault(e=>e.ImgId == selectedImg).isDP" ToggledChanged="onDPChange"
                                              Icon="@Icons.Material.Outlined.ThumbUp" Color="@Color.Error" Title="This is the display image"
                                              ToggledIcon="@Icons.Material.Filled.ThumbUp" ToggledColor="@Color.Success" ToggledTitle="This is not the display image" Style="box-shadow:none;" Size="Size.Large" ToggledSize="Size.Large" />
                     </MudTooltip>
@@ -84,7 +90,7 @@
             <div class="col-md-10 offset-1">
                 <center>
                     <MudTooltip Text="Delete Picture" Style="font-size:20px" Placement="Placement.Bottom">
-                        <MudIconButton Icon="@Icons.Material.Filled.Delete" Variant="Variant.Filled" Color="Color.Primary" Style="box-shadow:none; " Size="Size.Large" />
+                        <MudIconButton Icon="@Icons.Material.Filled.Delete" Variant="Variant.Filled" Color="Color.Primary" Style="box-shadow:none; " Size="Size.Large" OnClick="deleteImg"/>
                     </MudTooltip>
                 </center>
             </div>
@@ -94,7 +100,7 @@
 
 <NavMenu NavItem="OnlineShopNav" />
 <div style="display:@loadingIcon">
-    <MudProgressCircular Color="Color.Primary" Style="height:70px;width:70px;position:fixed;top:50%;left:50%;" Indeterminate="true" />
+    <MudProgressCircular Color="Color.Primary" Style="height:70px;width:70px;position:fixed;top:50%;left:50%;" Indeterminate="true"/>
 </div>
 
 @code {
@@ -107,8 +113,7 @@
     private List<IBrowserFile> loadedFiles = new();
     private List<string> loadedFileUrl = new();
     private int idNum = 0, selectedImg = -1;
-    //private List<imgClass> imgList = new();
-    private List<ImageModel> imgModel = new();
+    //private List<ImageModel> imgModel = new();
 
     private class imgClass
     {
@@ -124,7 +129,6 @@
         productModel = await http.GetFromJsonAsync<ProductModel>("api/Product/GetProductModel/" + prodID);
         stock = productModel.ProdStock.ToString();
         price = productModel.ProdPrice.ToString();
-        await GetFiles();
         isLoading(false);
     }
 
@@ -186,7 +190,8 @@
 
     private async Task GetFiles()
     {    
-        imgModel = await http.GetFromJsonAsync<List<ImageModel>>("api/Product/GetProductImages/" + prodID);
+        //imgModel = await http.GetFromJsonAsync<List<ImageModel>>("api/Product/GetProductImages/" + prodID);
+        productModel = await http.GetFromJsonAsync<ProductModel>("api/Product/GetProductModel/" + prodID);
     }
 
     private async Task UploadFile(InputFileChangeEventArgs e)
@@ -232,16 +237,29 @@
         }
     }
 
-    void onDPChange(bool toggled)
+    async Task onDPChange(bool toggled)
     {
         if (toggled)
         {
-            foreach (var item in imgModel)
+            foreach (var item in productModel.ImageList)
             {
                 if (item.ImgId == selectedImg)
                 {
-                    item.isDP = true;
-                    toolTip = "This is already marked as disply picture";
+                    var response = await http.PostAsJsonAsync<ImageModel>("api/Product/ChangeDP/", item);
+                    if (response.IsSuccessStatusCode)
+                    {
+                        item.isDP = true;
+                        isLoading(true);
+                        await GetFiles();
+                        isLoading(false);
+                        SB.Add("Display picture changed");
+                        toolTip = "This is already marked as disply picture";
+                    }
+                    else
+                    {
+                        SB.Add("Display picture changing faild. Please try again.", Severity.Error);
+                    }
+
                 }
                 else
                 {
@@ -256,7 +274,7 @@
         if (drawerOpen) drawerOpen = false;
         else drawerOpen = true;
         selectedImg = i;
-        if (imgModel.FirstOrDefault(e=>e.ImgId == selectedImg).isDP)
+        if (productModel.ImageList.FirstOrDefault(e=>e.ImgId == selectedImg).isDP)
         {
             toolTip = "This is already marked as disply picture";
         }
@@ -264,5 +282,42 @@
         {
             toolTip = "Mark this as display picture";
         }
+    }
+
+    async Task deleteImg()
+    {
+        var parameters = new DialogParameters();
+        parameters.Add("ContentText", "Do you really want to delete these records? This process cannot be undone.");
+        parameters.Add("ButtonText", "Delete");
+        parameters.Add("color", Color.Error);
+
+        var options = new DialogOptions() {DisableBackdropClick = true,  };
+        drawerOpen = !drawerOpen;
+        var result = await DS.Show<DialogBox>("Delete", parameters, options).Result;
+
+        if (!result.Cancelled)
+        {
+            var tempImg = productModel.ImageList.FirstOrDefault(e=>e.ImgId == selectedImg);
+            var response = await http.PostAsJsonAsync<ImageModel>("api/Product/DeleteImage/", tempImg);
+
+            if (response.IsSuccessStatusCode)
+            {
+                SB.Add("Image deleted.");
+                selectedImg = -1;
+                isLoading(true);
+                await GetFiles();
+                isLoading(false);
+            }
+            else
+            {
+                SB.Add("Deleting image changing faild. Please try again.", Severity.Error);
+                drawerOpen = !drawerOpen;
+            }
+        }
+        else
+        {
+            drawerOpen = !drawerOpen;
+        }
+
     }
 }
