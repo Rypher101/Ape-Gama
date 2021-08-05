@@ -54,5 +54,7 @@ namespace ApeGama.Shared
         public string fileString { get; set; }
         [NotMapped]
         public IList<ImageModel> ImageList { get; set; } = new List<ImageModel>();
+        [NotMapped]
+        public int qty { get; set; }
     }
 }

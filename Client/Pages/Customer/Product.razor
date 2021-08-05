@@ -13,16 +13,24 @@
                 <br />
                     <div class="form-group">
                         <h5 class="h5"><i>Description</i></h5>
-                        <div class="col offset-1"><h6 class="h6"><b>@productModel.ProdDescription</b></h6></div>
+                        <div class="col-md-11 offset-1"><h6 class="h6"><b>@productModel.ProdDescription</b></h6></div>
                     </div>
                     <div class="form-group">
                         <h5 class="h5"><i>Stock</i></h5>
-                        <div class="col offset-1"><h6 class="h6"><b>@productModel.ProdStock</b></h6></div>
+                        <div class="col-md-11 offset-1"><h6 class="h6"><b>@productModel.ProdStock</b></h6></div>
                     </div>
                     <div class="form-group">
                         <h5 class="h5"><i>Price (Rs.)</i></h5>
-                        <div class="col offset-1"><h6 class="h6"><b>@productModel.ProdPrice</b></h6></div>
+                        <div class="col-md-11 offset-1"><h6 class="h6"><b>@productModel.ProdPrice</b></h6></div>
                     </div>
+                    <AuthorizeView>
+                        <Authorized>
+                    <div class="form-group">
+                        <h5 class="h5"><i>Quantity</i></h5>
+                        <div class="col-md-11 offset-1"><input type="text" class="form-control rounded-left" placeholder="QTY" required @bind-value="qtyTemp" @onblur="QTYCheck"></div>
+                    </div>
+                    </Authorized>
+                        </AuthorizeView>
                     <div class="form-group">
                         <br />
                         <MudGrid>
@@ -35,6 +43,14 @@
                         </MudGrid>
                     </div>
                     <br />
+                    <br />
+                    <AuthorizeView>
+                        <Authorized>
+                            <div class="form-group">
+                            <button class="primary" style="width:100%" @onclick="AddToCart" >Add to Cart</button>
+                            </div>
+                        </Authorized>
+                        </AuthorizeView>
             </div>
         </div>
     </div>
@@ -49,10 +65,11 @@
     [Parameter]
     public string prodID { get; set; }
     private ProductModel productModel = new ProductModel();
-    private string stock, price, pointerEvent, loadingIcon = "none";
+    private string stock, price, pointerEvent, loadingIcon = "none", qtyTemp = "0";
     private double opacity = 1;
+    private int qty = 0;
 
-      void isLoading(bool value)
+    void isLoading(bool value)
     {
         if (value)
         {
@@ -73,6 +90,43 @@
         isLoading(true);
         productModel = await http.GetFromJsonAsync<ProductModel>("api/Product/GetProductModel/" + prodID);
         isLoading(false);
+
+        qtyTemp = productModel.qty.ToString();
     }
 
+    private void QTYCheck()
+    {
+        if (!string.IsNullOrWhiteSpace(qtyTemp))
+        {
+            if (!Int32.TryParse(qtyTemp, out qty) || qty < 0)
+            {
+                qtyTemp = productModel.qty.ToString();
+                SB.Add("Invalid Quantity. Please Re-Enter", Severity.Error);
+            }
+        }
+    }
+
+    private async Task AddToCart()
+    {
+        if(qty < 0)
+        {
+            SB.Add("Invalid Quantity. Please Re-Enter", Severity.Error);
+        }
+        else
+        {
+            var temp = new CartModel();
+            temp.prodID = productModel.ProdId;
+            temp.qty = qty;
+
+            var response = await http.PostAsJsonAsync<CartModel>("api/Product/AddToCart", temp);
+
+            if (response.StatusCode == System.Net.HttpStatusCode.OK)
+            {
+                SB.Add("Item added to cart");
+            }else if (response.StatusCode == System.Net.HttpStatusCode.Accepted)
+            {
+                SB.Add("Removed from cart");
+            }
+        }
+    }
 }

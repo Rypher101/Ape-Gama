@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -105,7 +106,7 @@ namespace ApeGama.Server.Controllers
         {
             int index = 0;
             var removeList = new List<ImageModel>();
-            var productModel = await _context.Products.Include(e=>e.Images).FirstOrDefaultAsync(e=>e.ProdId == id);
+            var productModel = await _context.Products.Include(e => e.Images).FirstOrDefaultAsync(e => e.ProdId == id);
 
             if (productModel == null)
             {
@@ -159,6 +160,17 @@ namespace ApeGama.Server.Controllers
             {
                 productModel.fileString = ex.Message;
                 return productModel;
+            }
+
+            var cart = HttpContext.Session.GetString("Cart");
+            if (!string.IsNullOrWhiteSpace(cart))
+            {
+                var temp = JsonConvert.DeserializeObject<List<CartModel>>(cart);
+                var tempItem = temp.Where(e => e.prodID == id).FirstOrDefault();
+                if (tempItem != null)
+                    productModel.qty = tempItem.qty;
+                else
+                    productModel.qty = 0;
             }
             return productModel;
         }
@@ -435,6 +447,64 @@ namespace ApeGama.Server.Controllers
             }
 
             return Ok();
+        }
+
+        [HttpPost]
+        public IActionResult AddToCart(CartModel model)
+        {
+            var inCart = false;
+            List<CartModel> cartModel = new List<CartModel>();
+            var cart = HttpContext.Session.GetString("Cart");
+            int status = 0;
+
+            if (!string.IsNullOrWhiteSpace(cart))
+                cartModel = JsonConvert.DeserializeObject<List<CartModel>>(cart);
+
+            if (model.qty > 0)
+            {
+                foreach (var item in cartModel)
+                {
+                    if (item.prodID == model.prodID)
+                    {
+                        item.qty = model.qty;
+                        inCart = true;
+                        status = 1;
+                        break;
+                    }
+                }
+            }
+            else
+            {
+                var tempRemove = cartModel.FirstOrDefault(e => e.prodID == model.prodID);
+                if (tempRemove != null)
+                {
+                    cartModel.Remove(tempRemove);
+                    status = 2;
+                    inCart= true;
+                }
+
+            }
+
+            if (!inCart && model.qty>0)
+            {
+                cartModel.Add(model);
+                status = 1;
+            }
+
+            HttpContext.Session.SetString("Cart", JsonConvert.SerializeObject(cartModel));
+
+            switch (status)
+            {
+                case 0:
+                    return BadRequest();
+                case 1:
+                    return Ok();
+                case 2:
+                    return Accepted();
+                default:
+                    return NotFound();
+            }
+
         }
 
         private bool ProductModelExists(int id)

@@ -12,10 +12,10 @@
                     <li style="display:@oldShop"><a href="/online_shop" class="@OnlineShop">Online Shop</a></li>
                 </Authorized>
             </AuthorizeView>
-            <AuthorizeView Roles="Customer">
-                <Authorized>
+            <AuthorizeView>
+                <NotAuthorized>
                     <li><a href="/marketplace" class="@Marketplace">Marketplace</a></li>
-                </Authorized>
+                </NotAuthorized>
             </AuthorizeView>
             <AuthorizeView>
                 <Authorized>
