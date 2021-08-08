@@ -10,5 +10,12 @@ namespace ApeGama.Shared
     {
         public int prodID { get; set; }
         public int qty { get; set; }
+        public string product { get; set; }
+        public decimal price { get; set; }
+        public string qtyString { get; set; }
+        public bool isAvailable { get; set; }
+        public int shopID { get; set; }
+        public string shopName { get; set; }
+        public int confirmShopID { get; set; }
     }
 }

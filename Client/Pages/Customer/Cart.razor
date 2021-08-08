@@ -1,0 +1,168 @@
+﻿@page "/view_cart"
+@inject NavigationManager UriHelper
+@inject ISnackbar SB
+@inject HttpClient http
+@using Microsoft.AspNetCore.Authorization
+@attribute [Authorize(Roles = "Customer")]
+
+<div id="wrapper" style="pointer-events:@pointerEvent; opacity:@opacity">
+    <HomeHeader />
+    <div class="main">
+        <div class="row align-content-center">
+            <div class="col-md-8 offset-2">
+                <h2 class="h2"><center>Shoping Cart</center></h2>
+                <br />
+                @if (itemsInCart)
+                {
+                    @for (int i = 0; i< cartModel.Count; i++)
+                    {
+                        var shopid = cartModel[i].shopID;
+
+                        <h3 class="h3">Shop Name : @cartModel[i].shopName</h3>
+                        <table class="table">
+                            <thead>
+                            <tr>
+                                <th>
+                                    Product Name
+                                </th>
+                                <th style="text-align:right;">
+                                    QTY
+                                </th>
+                                <th style="text-align:right;">
+                                    Cost (Per Unit)
+                                </th>
+                                <th style="text-align:right;">
+                                    Cost
+                                </th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @{decimal tot = 0;}
+                            @for (int j = i; j< cartModel.Count; j++)
+                            {
+                                    @if(shopid == cartModel[j].shopID)
+                                    {
+                                    var cost = cartModel[j].price * cartModel[j].qty;
+                                    <tr>
+                                    <td>
+                                        <h6 class="h6"><b>@cartModel[j].product</b></h6>
+                                    </td>
+                                    <td align="right">
+                                        <h6 class="h6"><b>@cartModel[j].qty</b></h6>
+                                    </td>
+                                    <td align="right">
+                                        <h6 class="h6"><b>Rs. @cartModel[j].price</b></h6>
+                                    </td>
+                                    <td align="right">
+                                        <h6 class="h6"><b>Rs. @cost</b></h6>
+                                    </td>
+                                </tr>
+                                    tot += cost;
+                                    }
+                                    else
+                                    {
+                                        j--;
+                                        i = j;
+                                        break;
+                                    }
+                                }
+                            <tr >
+                                <td colspan="3" align="right">
+                                    <b>Total: </b>
+                                </td>
+                                <td align="right">
+                                    Rs: @tot
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <div class="form-group">
+                        <button class="primary" style="width:100%" @onclick="@(_=>ConfirmOrder(cartModel[i].shopID))" >Confirm Order For : @cartModel[i].shopName</button>
+                    </div>
+                    <br>
+                    <br>
+                    }                   
+                }else{
+                    <h5 class="h5"><center>Sorry, There are no items in the cart.</center></h5>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+<NavMenu NavItem="Cart" />
+<div style="display:@loadingIcon">
+    <MudProgressCircular Color="Color.Primary" Style="height:70px;width:70px;position:fixed;top:50%;left:50%;" Indeterminate="true"/>
+</div>
+
+@code {
+    private List<CartModel> cartModel = new List<CartModel>();
+    private string stock, price, pointerEvent, loadingIcon = "none";
+    private double opacity = 1;
+    private int qty = 0;
+    private bool itemsInCart = false;
+
+    void isLoading(bool value)
+    {
+        if (value)
+        {
+            loadingIcon = "";
+            pointerEvent = "none";
+            opacity = 0.25;
+        }
+        else
+        {
+            loadingIcon = "none";
+            pointerEvent = "";
+            opacity = 1;
+        }
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        isLoading(true);
+        cartModel = await http.GetFromJsonAsync<List<CartModel>>("api/Cart/GetCartDetails");
+        isLoading(false);
+
+        if (cartModel == null || cartModel.Count == 0)
+            itemsInCart = false;
+        else
+        {
+            cartModel = cartModel.OrderBy(e=>e.shopID).ToList();
+            itemsInCart = true;
+        }
+        
+    }
+
+    void QTYCheck(int i)
+    {
+        if (!string.IsNullOrWhiteSpace(cartModel[i].qtyString))
+        {
+            int qty;
+            if (Int32.TryParse(cartModel[i].qtyString, out qty))
+            {
+                if (qty < 0)
+                {
+                    cartModel[i].qtyString = cartModel[i].qty.ToString();
+                    SB.Add("Invalid Quantity. Please Re-Enter", Severity.Error);
+                }
+                else
+                {
+                    cartModel[i].qty = qty;
+                }
+            }
+            else
+            {
+                cartModel[i].qtyString = cartModel[i].qty.ToString();
+                SB.Add("Invalid Quantity. Please Re-Enter", Severity.Error);
+            }
+        }
+    }
+
+    async Task ConfirmOrder(int id)
+    {
+        var confirmList = cartModel.Where(e => e.shopID == id).ToList();
+        var response = await http.PostAsJsonAsync<List<CartModel>>("api/Cart/ConfirmOrder", confirmList);
+    }
+}

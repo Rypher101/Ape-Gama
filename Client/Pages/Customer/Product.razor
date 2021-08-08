@@ -118,7 +118,7 @@
             temp.prodID = productModel.ProdId;
             temp.qty = qty;
 
-            var response = await http.PostAsJsonAsync<CartModel>("api/Product/AddToCart", temp);
+            var response = await http.PostAsJsonAsync<CartModel>("api/Cart/AddToCart", temp);
 
             if (response.StatusCode == System.Net.HttpStatusCode.OK)
             {

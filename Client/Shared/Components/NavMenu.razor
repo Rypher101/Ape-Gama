@@ -12,10 +12,11 @@
                     <li style="display:@oldShop"><a href="/online_shop" class="@OnlineShop">Online Shop</a></li>
                 </Authorized>
             </AuthorizeView>
-            <AuthorizeView>
-                <NotAuthorized>
-                    <li><a href="/marketplace" class="@Marketplace">Marketplace</a></li>
-                </NotAuthorized>
+            <li><a href="/marketplace" class="@Marketplace">Marketplace</a></li>
+            <AuthorizeView Roles="Customer">
+                <Authorized>
+                    <li><a href="/view_cart" class="@Cart">Cart</a></li>
+                </Authorized>
             </AuthorizeView>
             <AuthorizeView>
                 <Authorized>
@@ -39,7 +40,7 @@
 @code {
     [Parameter]
     public string NavItem { get; set; }
-    public string Home, LoginCus, LoginSup, OnlineShop, Marketplace, Profile;
+    public string Home, LoginCus, LoginSup, OnlineShop, Marketplace, Profile, Cart;
     private string oldShop="none";
 
     protected override async Task OnInitializedAsync()
@@ -63,6 +64,9 @@
                 break;
             case "Profile":
                 Profile = "active";
+                break;
+            case "Cart":
+                Cart = "active";
                 break;
             default:
                 break;

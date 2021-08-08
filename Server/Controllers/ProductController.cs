@@ -449,63 +449,63 @@ namespace ApeGama.Server.Controllers
             return Ok();
         }
 
-        [HttpPost]
-        public IActionResult AddToCart(CartModel model)
-        {
-            var inCart = false;
-            List<CartModel> cartModel = new List<CartModel>();
-            var cart = HttpContext.Session.GetString("Cart");
-            int status = 0;
+        //[HttpPost]
+        //public IActionResult AddToCart(CartModel model)
+        //{
+        //    var inCart = false;
+        //    List<CartModel> cartModel = new List<CartModel>();
+        //    var cart = HttpContext.Session.GetString("Cart");
+        //    int status = 0;
 
-            if (!string.IsNullOrWhiteSpace(cart))
-                cartModel = JsonConvert.DeserializeObject<List<CartModel>>(cart);
+        //    if (!string.IsNullOrWhiteSpace(cart))
+        //        cartModel = JsonConvert.DeserializeObject<List<CartModel>>(cart);
 
-            if (model.qty > 0)
-            {
-                foreach (var item in cartModel)
-                {
-                    if (item.prodID == model.prodID)
-                    {
-                        item.qty = model.qty;
-                        inCart = true;
-                        status = 1;
-                        break;
-                    }
-                }
-            }
-            else
-            {
-                var tempRemove = cartModel.FirstOrDefault(e => e.prodID == model.prodID);
-                if (tempRemove != null)
-                {
-                    cartModel.Remove(tempRemove);
-                    status = 2;
-                    inCart= true;
-                }
+        //    if (model.qty > 0)
+        //    {
+        //        foreach (var item in cartModel)
+        //        {
+        //            if (item.prodID == model.prodID)
+        //            {
+        //                item.qty = model.qty;
+        //                inCart = true;
+        //                status = 1;
+        //                break;
+        //            }
+        //        }
+        //    }
+        //    else
+        //    {
+        //        var tempRemove = cartModel.FirstOrDefault(e => e.prodID == model.prodID);
+        //        if (tempRemove != null)
+        //        {
+        //            cartModel.Remove(tempRemove);
+        //            status = 2;
+        //            inCart= true;
+        //        }
 
-            }
+        //    }
 
-            if (!inCart && model.qty>0)
-            {
-                cartModel.Add(model);
-                status = 1;
-            }
+        //    if (!inCart && model.qty>0)
+        //    {
+        //        cartModel.Add(model);
+        //        status = 1;
+        //    }
 
-            HttpContext.Session.SetString("Cart", JsonConvert.SerializeObject(cartModel));
+        //    HttpContext.Session.SetString("Cart", JsonConvert.SerializeObject(cartModel));
 
-            switch (status)
-            {
-                case 0:
-                    return BadRequest();
-                case 1:
-                    return Ok();
-                case 2:
-                    return Accepted();
-                default:
-                    return NotFound();
-            }
+        //    switch (status)
+        //    {
+        //        case 0:
+        //            return BadRequest();
+        //        case 1:
+        //            return Ok();
+        //        case 2:
+        //            return Accepted();
+        //        default:
+        //            return NotFound();
+        //    }
 
-        }
+        //}
 
         private bool ProductModelExists(int id)
         {
