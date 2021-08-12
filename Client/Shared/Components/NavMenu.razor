@@ -16,6 +16,7 @@
             <AuthorizeView Roles="Customer">
                 <Authorized>
                     <li><a href="/view_cart" class="@Cart">Cart</a></li>
+                    <li><a href="/view_orders" class="@Orders">Orders</a></li>
                 </Authorized>
             </AuthorizeView>
             <AuthorizeView>
@@ -40,7 +41,7 @@
 @code {
     [Parameter]
     public string NavItem { get; set; }
-    public string Home, LoginCus, LoginSup, OnlineShop, Marketplace, Profile, Cart;
+    public string Home, LoginCus, LoginSup, OnlineShop, Marketplace, Profile, Cart, Orders;
     private string oldShop="none";
 
     protected override async Task OnInitializedAsync()
@@ -67,6 +68,9 @@
                 break;
             case "Cart":
                 Cart = "active";
+                break;
+            case "Orders":
+                Orders = "active";
                 break;
             default:
                 break;

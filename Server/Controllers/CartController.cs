@@ -117,16 +117,48 @@ namespace ApeGama.Server.Controllers
         [HttpPost]
         public ActionResult ConfirmOrder(List<CartModel> model)
         {
-            if (model.Count > 0)
+            try
             {
+                if (model.Count > 0)
+                {
+                    var cusID = HttpContext.Session.GetInt32("UID");
+                    var order = new OrderModel()
+                    {
+                        ShopId = model.First().shopID,
+                        CusId = (int)cusID,
+                        OrderDate = DateTime.Now.Date,
+                        OrderStatus = 0
+                    };
 
+                    _context.Orders.Add(order);
+                    _context.SaveChanges();
+
+                    int oID = order.OrderId;
+
+                    foreach (var item in model)
+                    {
+                        var temp = new OrderProductModel()
+                        {
+                            OrderId = oID,
+                            ProdId = item.prodID,
+                            Qty = item.qty
+                        };
+                        _context.OrderProducts.Add(temp);
+                    }
+
+                    _context.SaveChanges();
+                    return Ok(oID);
+                }
+                else
+                {
+                    return BadRequest();
+                }
             }
-            else
+            catch (Exception)
             {
                 return BadRequest();
-            }
-
-            return Ok();
+                throw;
+            }    
         }
     }
 }

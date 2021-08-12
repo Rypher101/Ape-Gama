@@ -17,5 +17,6 @@ namespace ApeGama.Shared
         public int shopID { get; set; }
         public string shopName { get; set; }
         public int confirmShopID { get; set; }
+        public int orderID { get; set; }
     }
 }

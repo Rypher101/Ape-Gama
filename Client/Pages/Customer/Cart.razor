@@ -14,7 +14,7 @@
                 <br />
                 @if (itemsInCart)
                 {
-                    @for (int i = 0; i< cartModel.Count; i++)
+                    for (int i = 0; i< cartModel.Count; i++)
                     {
                         var shopid = cartModel[i].shopID;
 
@@ -34,7 +34,6 @@
                                 <th style="text-align:right;">
                                     Cost
                                 </th>
-                                <th></th>
                             </tr>
                         </thead>
                         <tbody>
@@ -63,9 +62,9 @@
                                     else
                                     {
                                         j--;
-                                        i = j;
                                         break;
                                     }
+                                    i = j;
                                 }
                             <tr >
                                 <td colspan="3" align="right">
@@ -78,7 +77,7 @@
                         </tbody>
                     </table>
                     <div class="form-group">
-                        <button class="primary" style="width:100%" @onclick="@(_=>ConfirmOrder(cartModel[i].shopID))" >Confirm Order For : @cartModel[i].shopName</button>
+                        <button class="primary" style="width:100%" @onclick="e=>ConfirmOrder(shopid)" >Confirm Order For : @cartModel[i].shopName</button>
                     </div>
                     <br>
                     <br>
@@ -164,5 +163,10 @@
     {
         var confirmList = cartModel.Where(e => e.shopID == id).ToList();
         var response = await http.PostAsJsonAsync<List<CartModel>>("api/Cart/ConfirmOrder", confirmList);
+
+        if (response.IsSuccessStatusCode)
+        {
+            SB.Add("Order placed. Order ID : " + await response.Content.ReadAsStringAsync());
+        }
     }
 }
