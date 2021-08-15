@@ -18,6 +18,8 @@ namespace ApeGama.Shared
         public decimal Qty { get; set; }
         [Column("unit")]
         public int Unit { get; set; }
+        [Column("unit_price", TypeName = "decimal(8, 2)")]
+        public decimal UnitPrice { get; set; }
 
         [ForeignKey(nameof(OrderId))]
         [InverseProperty("OrderProducts")]

@@ -1,6 +1,8 @@
-﻿using ApeGama.Shared;
-using Microsoft.EntityFrameworkCore;
+﻿using System;
 using System.Configuration;
+using ApeGama.Shared;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata;
 
 #nullable disable
 
@@ -27,7 +29,6 @@ namespace ApeGama.Server.Data
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-
             if (!optionsBuilder.IsConfigured)
             {
                 optionsBuilder.UseSqlServer(ConfigurationManager.ConnectionStrings["MainDB"].ConnectionString);
@@ -67,6 +68,10 @@ namespace ApeGama.Server.Data
 
             modelBuilder.Entity<OrderModel>(entity =>
             {
+                entity.Property(e => e.OrderAddress).IsUnicode(false);
+
+                entity.Property(e => e.OrderContact).IsUnicode(false);
+
                 entity.Property(e => e.OrderStatus).HasDefaultValueSql("((1))");
 
                 entity.HasOne(d => d.Cus)

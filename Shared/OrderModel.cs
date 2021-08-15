@@ -29,6 +29,12 @@ namespace ApeGama.Shared
         public DateTime? ReceivedDate { get; set; }
         [Column("order_status", TypeName = "numeric(1, 0)")]
         public decimal OrderStatus { get; set; }
+        [Column("order_address")]
+        [StringLength(100)]
+        public string OrderAddress { get; set; }
+        [Column("order_contact")]
+        [StringLength(50)]
+        public string OrderContact { get; set; }
 
         [ForeignKey(nameof(CusId))]
         [InverseProperty(nameof(UserModel.Orders))]

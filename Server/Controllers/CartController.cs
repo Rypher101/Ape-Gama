@@ -7,7 +7,6 @@ using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -61,7 +60,7 @@ namespace ApeGama.Server.Controllers
 
             if (!inCart && model.qty > 0)
             {
-                var temp = _context.Products.Include(e=>e.Shop).FirstOrDefault(e => e.ProdId == model.prodID);
+                var temp = _context.Products.Include(e => e.Shop).FirstOrDefault(e => e.ProdId == model.prodID);
                 model.shopID = temp.ShopId;
                 model.shopName = temp.Shop.ShopName;
 
@@ -114,51 +113,52 @@ namespace ApeGama.Server.Controllers
             return cartDetails;
         }
 
-        [HttpPost]
-        public ActionResult ConfirmOrder(List<CartModel> model)
+        [HttpGet("{id}")]
+        public ConfirmOrderModel ConfirmOrder(int id)
         {
+            var user = new UserModel();
+            var order = new ConfirmOrderModel();
+            var cartDetails = new List<CartModel>();
             try
             {
-                if (model.Count > 0)
+                user = _context.Users.Find(HttpContext.Session.GetInt32("UID"));
+                if (user == null)
+                    return null;
+
+                order.address = user.UserAddress;
+                order.contact = user.UserTp;
+
+                order.shopID = id;
+                order.shop = _context.OnlineShops.Find(id).ShopName;
+
+                var sessionCart = HttpContext.Session.GetString("Cart");
+
+                if (!string.IsNullOrEmpty(sessionCart))
+                    cartDetails = JsonConvert.DeserializeObject<List<CartModel>>(sessionCart);
+                else
+                    return null;
+
+                foreach (var item in cartDetails)
                 {
-                    var cusID = HttpContext.Session.GetInt32("UID");
-                    var order = new OrderModel()
+                    var temp = _context.Products.FirstOrDefault(e => e.ProdId == item.prodID);
+                    if (temp == null)
                     {
-                        ShopId = model.First().shopID,
-                        CusId = (int)cusID,
-                        OrderDate = DateTime.Now.Date,
-                        OrderStatus = 0
-                    };
-
-                    _context.Orders.Add(order);
-                    _context.SaveChanges();
-
-                    int oID = order.OrderId;
-
-                    foreach (var item in model)
-                    {
-                        var temp = new OrderProductModel()
-                        {
-                            OrderId = oID,
-                            ProdId = item.prodID,
-                            Qty = item.qty
-                        };
-                        _context.OrderProducts.Add(temp);
+                        HttpContext.Session.SetString("Cart", "");
+                        cartDetails.Clear();
+                        return null;
                     }
 
-                    _context.SaveChanges();
-                    return Ok(oID);
+                    order.total += item.qty * temp.ProdPrice;
                 }
-                else
-                {
-                    return BadRequest();
-                }
+
+                return order;
             }
             catch (Exception)
             {
-                return BadRequest();
+                return null;
                 throw;
-            }    
+            }
+
         }
     }
 }

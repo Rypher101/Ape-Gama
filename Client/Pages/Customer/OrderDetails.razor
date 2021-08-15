@@ -29,52 +29,65 @@
                     </div>
                     <div class="form-group">
                         <h5 class="h5"><i>Contact No</i></h5>
-                        <div class="col-md-11 offset-1"><h6 class="h6"><b>'in development'</b></h6></div>
+                        <div class="col-md-11 offset-1"><h6 class="h6"><b>@orderModel.OrderContact</b></h6></div>
                     </div>
                     <div class="form-group">
                         <h5 class="h5"><i>Address</i></h5>
-                        <div class="col-md-11 offset-1"><h6 class="h6"><b>'in development'</b></h6></div>
+                        <div class="col-md-11 offset-1"><h6 class="h6"><b>@orderModel.OrderAddress</b></h6></div>
                     </div>
                     <div class="form-group">
                         <h5 class="h5"><i>Status</i></h5>
                         @{ var status = orderModel.OrderStatus == 3 ? "Received" :  orderModel.OrderStatus == 2 ? "Shiped" : "Pending";}
                         <div class="col-md-11 offset-1"><h6 class="h6"><b>@status</b></h6></div>
                     </div>
-                        <table class="table">
-                            <thead>
+                    <table class="table">
+                        <thead>
                             <tr>
                                 <th>
                                     Item
                                 </th>
-                                <th>
+                                <th align="right">
                                     QTY
                                 </th>
-                                <th>
+                                <th align="right">
                                     Price per unit
                                 </th>
-                                <th>
+                                <th align="right">
                                     Price
                                 </th>
                             </tr>
                         </thead>
                         <tbody>
+                            @{decimal tot = 0;}
                             @foreach (var item in orderModel.OrderProducts)
                             { 
                                 <tr>
-                                    <td style="vertical-align:middle">
+                                    <td>
                                         <h6 class="h6"><b>@item.Prod.ProdName</b></h6>
                                     </td>
-                                    <td style="vertical-align:middle">
+                                    <td align="right">
                                         <h6 class="h6"><b>@item.Qty</b></h6>
                                     </td>
-                                    <td style="vertical-align:middle">
-                                        <h6 class="h6"><b>'in development'</b></h6>
+                                    <td align="right">
+                                        <h6 class="h6"><b>Rs. @item.UnitPrice</b></h6>
                                     </td>
-                                    <td style="vertical-align:middle">
-                                        <h6 class="h6"><b>'in development'</b></h6>
+                                    <td align="right">
+                                        @{
+                                            var itemTot = Math.Round(item.Qty * item.UnitPrice, 2);
+                                            tot = tot + itemTot;
+                                        }
+                                        <h6 class="h6"><b>Rs. @itemTot</b></h6>
                                     </td>
                                 </tr>
                             }
+                            <tr >
+                                <td colspan="3" align="right">
+                                    <b>Total: </b>
+                                </td>
+                                <td align="right">
+                                    Rs: @tot
+                                </td>
+                            </tr>
                         </tbody>
                     </table>
                     <br>
