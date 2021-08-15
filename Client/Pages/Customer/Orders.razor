@@ -52,12 +52,14 @@
                                     <td style="vertical-align:middle">
                                         <h6 class="h6"><b>@rDate</b></h6>
                                     </td>
-                                    @{ var status = item.OrderStatus == 2 ? "Received" : "Pending";}
+                                    @{ var status = item.OrderStatus == 3 ? "Received" :  item.OrderStatus == 2 ? "Shiped" : "Pending";}
                                     <td style="vertical-align:middle">
                                         <h6 class="h6">@status<b></b></h6>
                                     </td>
                                     <td>
-                                        <button>View</button>
+                                        <MudTooltip Text="Order Details">
+                                            <MudIconButton Icon="@Icons.Material.Outlined.Article" Color="Color.Default" @onclick="()=>OrderDetails(item.OrderId)" Style="box-shadow:none; height:auto" />
+                                        </MudTooltip>
 									</td>
                                 </tr>
                             }
@@ -112,6 +114,10 @@
         {
             itemsInOrder = true;
         }
-        
+    }
+
+    private async Task OrderDetails(int orderID)
+    {
+        UriHelper.NavigateTo("/view_order/" + orderID);
     }
 }
