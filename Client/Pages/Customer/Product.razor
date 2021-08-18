@@ -23,7 +23,7 @@
                         <h5 class="h5"><i>Price (Rs.)</i></h5>
                         <div class="col-md-11 offset-1"><h6 class="h6"><b>@productModel.ProdPrice</b></h6></div>
                     </div>
-                    <AuthorizeView>
+                    <AuthorizeView Roles="Customer">
                         <Authorized>
                     <div class="form-group">
                         <h5 class="h5"><i>Quantity</i></h5>
@@ -44,13 +44,13 @@
                     </div>
                     <br />
                     <br />
-                    <AuthorizeView>
+                    <AuthorizeView Roles="Customer">
                         <Authorized>
                             <div class="form-group">
                             <button class="primary" style="width:100%" @onclick="AddToCart" >Add to Cart</button>
                             </div>
                         </Authorized>
-                        </AuthorizeView>
+                    </AuthorizeView>
             </div>
         </div>
     </div>

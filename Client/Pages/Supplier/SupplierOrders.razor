@@ -1,0 +1,123 @@
+﻿@page "/view_orders_supplier"
+@inject NavigationManager UriHelper
+@inject ISnackbar SB
+@inject HttpClient http
+@using Microsoft.AspNetCore.Authorization
+@attribute [Authorize(Roles = "Supplier")]
+
+<div id="wrapper" style="pointer-events:@pointerEvent; opacity:@opacity">
+    <HomeHeader />
+    <div class="main">
+        <div class="row align-content-center">
+            <div class="col-md-8 offset-2">
+                <h2 class="h2"><center>Orders</center></h2>
+                <br />
+                @if (itemsInOrder)
+                {
+                        <table class="table">
+                            <thead>
+                            <tr>
+                                <th>
+                                    Order ID
+                                </th>
+                                <th>
+                                    Customer 
+                                </th>
+                                <th>
+                                    Placed Date
+                                </th>
+                                <th>
+                                    Reseved Date
+                                </th>
+                                <th>
+                                    Status
+								</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in orderModel)
+                            {
+                                <tr>
+                                    <td style="vertical-align:middle">
+                                        <h6 class="h6"><b>@item.OrderId</b></h6>
+                                    </td>
+                                    <td style="vertical-align:middle">
+                                        <h6 class="h6"><b>@item.Cus.UserName</b></h6>
+                                    </td>
+                                    <td style="vertical-align:middle">
+                                        <h6 class="h6"><b>@item.OrderDate.ToString("yyyy - MMM - dd")</b></h6>
+                                    </td>
+                                    @{var rDate = item.ReceivedDate != null ? Convert.ToDateTime(item.ReceivedDate).ToString("yyyy - MMM - dd") : "";}
+                                    <td style="vertical-align:middle">
+                                        <h6 class="h6"><b>@rDate</b></h6>
+                                    </td>
+                                    @{ var status = item.OrderStatus == 3 ? "Received" :  item.OrderStatus == 2 ? "Shiped" : "Pending";}
+                                    <td style="vertical-align:middle">
+                                        <h6 class="h6">@status<b></b></h6>
+                                    </td>
+                                    <td>
+                                        <MudTooltip Text="Order Details">
+                                            <MudIconButton Icon="@Icons.Material.Outlined.Article" Color="Color.Default" @onclick="()=>OrderDetails(item.OrderId)" Style="box-shadow:none; height:auto" />
+                                        </MudTooltip>
+									</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                    <br>
+                    <br>               
+                }else{
+                    <h5 class="h5"><center>Sorry, There are no orders placed.</center></h5>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+<NavMenu NavItem="Orders" />
+<div style="display:@loadingIcon">
+    <MudProgressCircular Color="Color.Primary" Style="height:70px;width:70px;position:fixed;top:50%;left:50%;" Indeterminate="true"/>
+</div>
+@code {
+    private List<OrderModel> orderModel = new List<OrderModel>();
+    private string stock, price, pointerEvent, loadingIcon = "none";
+    private double opacity = 1;
+    private int qty = 0;
+    private bool itemsInOrder = false;
+
+    void isLoading(bool value)
+    {
+        if (value)
+        {
+            loadingIcon = "";
+            pointerEvent = "none";
+            opacity = 0.25;
+        }
+        else
+        {
+            loadingIcon = "none";
+            pointerEvent = "";
+            opacity = 1;
+        }
+    }
+
+     protected override async Task OnInitializedAsync()
+    {
+        isLoading(true);
+        orderModel = await http.GetFromJsonAsync<List<OrderModel>>("api/Order/GetOrdersSupplier");
+        isLoading(false);
+
+        if (orderModel == null || orderModel.Count == 0)
+            itemsInOrder = false;
+        else
+        {
+            itemsInOrder = true;
+        }
+    }
+
+    private async Task OrderDetails(int orderID)
+    {
+        UriHelper.NavigateTo("/view_order/" + orderID);
+    }
+}

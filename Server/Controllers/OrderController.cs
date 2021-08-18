@@ -147,5 +147,24 @@ namespace ApeGama.Server.Controllers
                 throw;
             }
         }
+
+        [HttpGet]
+        public List<OrderModel> GetOrdersSupplier()
+        {
+            try
+            {
+                var shopID = HttpContext.Session.GetInt32("ShopID");
+                if (shopID == 0)
+                    return null;
+                
+                var modelList = _context.Orders.Where(e=>e.ShopId == shopID).OrderBy(e=>e.OrderStatus).ThenByDescending(e=>e.OrderId).Include(e=>e.Cus).ToList();
+                return modelList;
+            }
+            catch (Exception)
+            {
+                return null;
+                throw;
+            }
+        }
     }
 }
