@@ -66,15 +66,18 @@ namespace ApeGama.Shared
                     builder.Append(bytes[i].ToString("x2"));
                 }
                 UserPass = builder.ToString();
-
-                if (isNewPass)
+            }
+            if (isNewPass)
+            {
+                using (SHA256 sha256Hash = SHA256.Create())
                 {
+                    StringBuilder builder2 = new StringBuilder();
                     byte[] bytesNew = sha256Hash.ComputeHash(Encoding.UTF8.GetBytes(OldUserPass));
-                    for (int i = 0; i < bytes.Length; i++)
+                    for (int i = 0; i < bytesNew.Length; i++)
                     {
-                        builder.Append(bytes[i].ToString("x2"));
+                        builder2.Append(bytesNew[i].ToString("x2"));
                     }
-                    OldUserPass = builder.ToString();
+                    OldUserPass = builder2.ToString();
                 }
             }
         }

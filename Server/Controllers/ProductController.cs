@@ -177,33 +177,24 @@ namespace ApeGama.Server.Controllers
 
         // PUT: api/Product/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutProductModel(int id, ProductModel productModel)
+        [HttpPost]
+        public async Task<IActionResult> PutProductModel(ProductModel productModel)
         {
-            if (id != productModel.ProdId)
-            {
-                return BadRequest();
-            }
-
             _context.Entry(productModel).State = EntityState.Modified;
 
             try
             {
-                await _context.SaveChangesAsync();
+                var response = await _context.SaveChangesAsync();
+                if (response > 0)
+                    return Ok();
+                else
+                    return NotFound();
+
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!ProductModelExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
-
-            return NoContent();
+               return NotFound();
+            }   
         }
 
         // POST: api/Product
@@ -277,6 +268,7 @@ namespace ApeGama.Server.Controllers
                                 else
                                 {
                                     path = Path.Combine(path, " (" + i + ")" + imageModel.ImgName);
+                                    imageModel.ImgName = " (" + i + ")" + imageModel.ImgName;
                                     break;
                                 }
                             }
@@ -448,64 +440,6 @@ namespace ApeGama.Server.Controllers
 
             return Ok();
         }
-
-        //[HttpPost]
-        //public IActionResult AddToCart(CartModel model)
-        //{
-        //    var inCart = false;
-        //    List<CartModel> cartModel = new List<CartModel>();
-        //    var cart = HttpContext.Session.GetString("Cart");
-        //    int status = 0;
-
-        //    if (!string.IsNullOrWhiteSpace(cart))
-        //        cartModel = JsonConvert.DeserializeObject<List<CartModel>>(cart);
-
-        //    if (model.qty > 0)
-        //    {
-        //        foreach (var item in cartModel)
-        //        {
-        //            if (item.prodID == model.prodID)
-        //            {
-        //                item.qty = model.qty;
-        //                inCart = true;
-        //                status = 1;
-        //                break;
-        //            }
-        //        }
-        //    }
-        //    else
-        //    {
-        //        var tempRemove = cartModel.FirstOrDefault(e => e.prodID == model.prodID);
-        //        if (tempRemove != null)
-        //        {
-        //            cartModel.Remove(tempRemove);
-        //            status = 2;
-        //            inCart= true;
-        //        }
-
-        //    }
-
-        //    if (!inCart && model.qty>0)
-        //    {
-        //        cartModel.Add(model);
-        //        status = 1;
-        //    }
-
-        //    HttpContext.Session.SetString("Cart", JsonConvert.SerializeObject(cartModel));
-
-        //    switch (status)
-        //    {
-        //        case 0:
-        //            return BadRequest();
-        //        case 1:
-        //            return Ok();
-        //        case 2:
-        //            return Accepted();
-        //        default:
-        //            return NotFound();
-        //    }
-
-        //}
 
         private bool ProductModelExists(int id)
         {

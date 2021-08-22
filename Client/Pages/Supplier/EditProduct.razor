@@ -134,13 +134,15 @@
 
     private async Task HandleValidSubmit()
     {
+        StockCheck();
+        PriceCheck();
         if (validPrice & validStock)
         {
             productModel.ProdStock = int.Parse(stock);
             productModel.ProdPrice = decimal.Parse(price);
             productModel.ProdStatus = true;
 
-            var response = await http.PostAsJsonAsync("api/Product/PostProductModel", productModel);
+            var response = await http.PostAsJsonAsync("api/Product/PutProductModel", productModel);
             if (response.IsSuccessStatusCode)
             {
                 SB.Add("Product Registered!");

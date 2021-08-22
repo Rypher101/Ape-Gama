@@ -46,13 +46,13 @@
                                 <th>
                                     Item
                                 </th>
-                                <th align="right">
+                                <th style="text-align:right">
                                     QTY
                                 </th>
-                                <th align="right">
+                                <th style="text-align:right">
                                     Price per unit
                                 </th>
-                                <th align="right">
+                                <th style="text-align:right">
                                     Price
                                 </th>
                             </tr>
@@ -92,7 +92,7 @@
                     </table>
                     <br>
                     <br>  
-                    @if (orderModel.OrderStatus != 3)
+                    @if (orderModel.OrderStatus == 2)
                     {
                         <div class="form-group">
                             <button class="primary" style="width:100%" @onclick="MarkAsReceived" >Mark as received</button>

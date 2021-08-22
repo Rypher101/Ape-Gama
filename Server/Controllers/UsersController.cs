@@ -59,27 +59,29 @@ namespace ApeGama.Server.Controllers
         [HttpPut]
         public async Task<IActionResult> PutUser(UserModel user)
         {
-            var entity = _context.Users.Attach(user);
-            entity.Property(x => x.UserName).IsModified = true;
-            entity.Property(x => x.UserTp).IsModified = true;
-            entity.Property(x => x.UserEmail).IsModified = true;
-
+            bool changePass = false;
             if (user.passwordChange)
             {
-                var temp = await _context.Users.FirstOrDefaultAsync(e => e.UserId == user.UserId);
+                var temp = await _context.Users.AsNoTracking().FirstOrDefaultAsync(e => e.UserId == user.UserId);
 
-                if (string.Equals(temp.UserPass, user.OldUserPass))
-                    entity.Property(x => x.UserPass).IsModified = true;
+                if (temp.UserPass == user.OldUserPass)
+                    changePass = true;
                 else
                     return BadRequest();
             }
 
-
             try
             {
+                var entity = _context.Users.Attach(user);
+                entity.Property(x => x.UserName).IsModified = true;
+                entity.Property(x => x.UserTp).IsModified = true;
+                entity.Property(x => x.UserEmail).IsModified = true;
+                if (changePass)
+                    entity.Property(x => x.UserPass).IsModified = true;
+
                 await _context.SaveChangesAsync();
             }
-            catch (DbUpdateConcurrencyException)
+            catch (Exception)
             {
                 return NotFound();
             }

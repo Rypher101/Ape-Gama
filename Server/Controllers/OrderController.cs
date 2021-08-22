@@ -72,6 +72,7 @@ namespace ApeGama.Server.Controllers
                 if (temp != null)
                 {
                     temp.OrderStatus = 3;
+                    temp.ReceivedDate = DateTime.Now;
                     _context.Attach(temp);
                     _context.Entry(temp).Property(e => e.OrderStatus).IsModified = true;
                     _context.SaveChanges();
@@ -177,6 +178,7 @@ namespace ApeGama.Server.Controllers
                 .Include(e => e.Shop)
                 .Include(e => e.OrderProducts)
                 .ThenInclude(e => e.Prod)
+                .AsNoTracking()
                 .FirstOrDefaultAsync();
 
                 if (temp != null)
@@ -184,13 +186,22 @@ namespace ApeGama.Server.Controllers
                     temp.OrderStatus = 2;
                     _context.Attach(temp);
                     _context.Entry(temp).Property(e => e.OrderStatus).IsModified = true;
-                    _context.SaveChanges();
+                    await _context.SaveChangesAsync();
                 }
                 else
                 {
                     return null;
                 }
 
+                _context.ChangeTracker.Clear();
+
+                foreach (var item in temp.OrderProducts)
+                {
+                    var tempProd = await _context.Products.AsNoTracking().Where(e=>e.ProdId == item.ProdId).FirstOrDefaultAsync();
+                    tempProd.ProdStock = (int)(tempProd.ProdStock - item.Qty);
+                    _context.Entry(tempProd).State = EntityState.Modified;
+                    await _context.SaveChangesAsync();  
+                }
                 return temp;
             }
             catch (Exception)

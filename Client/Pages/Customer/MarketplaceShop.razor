@@ -22,7 +22,18 @@
                                     <MudText Typo="Typo.h5" Style="padding-bottom:10px">@item.ProdName </MudText>
                                     <MudText Typo="Typo.body2" Style="padding-bottom:10px">@item.ProdDescription</MudText>
                                     <MudDivider />
-                                    <MudText Typo="Typo.subtitle2" Style="padding-bottom:10px; padding-top:10px">Stock : @item.ProdStock</MudText>
+                                    @{ string stock;
+                                        if (item.ProdStock > 0)
+                                        {
+                                            stock = "IN STOCK";
+                                        }
+                                        else
+                                        {
+                                            stock = "<style='color:red'>OUT OF STOCK</style>";
+                                        }
+
+                                    }
+                                    <MudText Typo="Typo.subtitle2" Style="padding-bottom:10px; padding-top:10px">Stock : @stock</MudText>
                                     <MudText Typo="Typo.subtitle2" Style="padding-bottom:10px">Price : Rs. @item.ProdPrice</MudText>
                                 </MudCardContent>
                                 <MudCardActions Style="align-content:flex-end;">
