@@ -166,5 +166,37 @@ namespace ApeGama.Server.Controllers
                 throw;
             }
         }
+
+        [HttpGet("{id}")]
+        public async Task<OrderModel> MarkAsShipped(int id)
+        {
+            try
+            {
+                var temp = await _context.Orders
+                .Where(e => e.OrderId == id)
+                .Include(e => e.Shop)
+                .Include(e => e.OrderProducts)
+                .ThenInclude(e => e.Prod)
+                .FirstOrDefaultAsync();
+
+                if (temp != null)
+                {
+                    temp.OrderStatus = 2;
+                    _context.Attach(temp);
+                    _context.Entry(temp).Property(e => e.OrderStatus).IsModified = true;
+                    _context.SaveChanges();
+                }
+                else
+                {
+                    return null;
+                }
+
+                return temp;
+            }
+            catch (Exception)
+            {
+                return null;
+            }
+        }
     }
 }

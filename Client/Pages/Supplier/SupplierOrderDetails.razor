@@ -1,5 +1,177 @@
-﻿<h3>SupplierOrderDetails</h3>
+﻿@page "/view_order_supplier/{orderID}"
+@inject NavigationManager UriHelper
+@inject ISnackbar SB
+@inject HttpClient http
+@using Microsoft.AspNetCore.Authorization
+@attribute [Authorize(Roles = "Supplier")]
+@inject IDialogService DS
 
+<div id="wrapper" style="pointer-events:@pointerEvent; opacity:@opacity">
+    <HomeHeader />
+    <div class="main">
+        <div class="row align-content-center">
+            <div class="col-md-8 offset-2">
+                <h2 class="h2"><center>Order : @orderModel.OrderId</center></h2>
+                @if (itemsInOrder)
+                {
+                    <div class="form-group">
+                        <h5 class="h5"><i>Shop Name : </i></h5>
+                        <div class="col-md-11 offset-1"><h6 class="h6"><b>@orderModel.Shop.ShopName</b></h6></div>
+                    </div>
+                    <div class="form-group">
+                        <h5 class="h5"><i>Placed Date</i></h5>
+                        <div class="col-md-11 offset-1"><h6 class="h6"><b>@orderModel.OrderDate.ToString("yyyy - MMMM - dd")</b></h6></div>
+                    </div>
+                    <div class="form-group">
+                        <h5 class="h5"><i>Received Date</i></h5>
+                        @{var rDate = orderModel.ReceivedDate != null ? Convert.ToDateTime(orderModel.ReceivedDate).ToString("yyyy - MMMM - dd") : "";}
+                        <div class="col-md-11 offset-1"><h6 class="h6"><b>@rDate</b></h6></div>
+                    </div>
+                    <div class="form-group">
+                        <h5 class="h5"><i>Contact No</i></h5>
+                        <div class="col-md-11 offset-1"><h6 class="h6"><b>@orderModel.OrderContact</b></h6></div>
+                    </div>
+                    <div class="form-group">
+                        <h5 class="h5"><i>Address</i></h5>
+                        <div class="col-md-11 offset-1"><h6 class="h6"><b>@orderModel.OrderAddress</b></h6></div>
+                    </div>
+                    <div class="form-group">
+                        <h5 class="h5"><i>Status</i></h5>
+                        @{ var status = orderModel.OrderStatus == 3 ? "Received" :  orderModel.OrderStatus == 2 ? "Shiped" : "Pending";}
+                        <div class="col-md-11 offset-1"><h6 class="h6"><b>@status</b></h6></div>
+                    </div>
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>
+                                    Item
+                                </th>
+                                <th align="right">
+                                    QTY
+                                </th>
+                                <th align="right">
+                                    Price per unit
+                                </th>
+                                <th align="right">
+                                    Price
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @{decimal tot = 0;}
+                            @foreach (var item in orderModel.OrderProducts)
+                            { 
+                                <tr>
+                                    <td>
+                                        <h6 class="h6"><b>@item.Prod.ProdName</b></h6>
+                                    </td>
+                                    <td align="right">
+                                        <h6 class="h6"><b>@item.Qty</b></h6>
+                                    </td>
+                                    <td align="right">
+                                        <h6 class="h6"><b>Rs. @item.UnitPrice</b></h6>
+                                    </td>
+                                    <td align="right">
+                                        @{
+                                            var itemTot = Math.Round(item.Qty * item.UnitPrice, 2);
+                                            tot = tot + itemTot;
+                                        }
+                                        <h6 class="h6"><b>Rs. @itemTot</b></h6>
+                                    </td>
+                                </tr>
+                            }
+                            <tr >
+                                <td colspan="3" align="right">
+                                    <b>Total: </b>
+                                </td>
+                                <td align="right">
+                                    Rs: @tot
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <br>
+                    <br>  
+                    @if (orderModel.OrderStatus != 3)
+                    {
+                        <div class="form-group">
+                            <button class="primary" style="width:100%" @onclick="MarkAsReceived" >Mark as Shipped</button>
+                        </div>
+                    } 
+                }else{
+                    <h5 class="h5"><center>Sorry, There are no orders found.</center></h5>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+<NavMenu NavItem="Orders" />
+<div style="display:@loadingIcon">
+    <MudProgressCircular Color="Color.Primary" Style="height:70px;width:70px;position:fixed;top:50%;left:50%;" Indeterminate="true"/>
+</div>
 @code {
+    [Parameter]
+    public string orderID { get; set; }
+    private OrderModel orderModel = new OrderModel();
+    private string stock, price, pointerEvent, loadingIcon = "none";
+    private double opacity = 1;
+    private int qty = 0;
+    private bool itemsInOrder = false;
 
+    void isLoading(bool value)
+    {
+        if (value)
+        {
+            loadingIcon = "";
+            pointerEvent = "none";
+            opacity = 0.25;
+        }
+        else
+        {
+            loadingIcon = "none";
+            pointerEvent = "";
+            opacity = 1;
+        }
+    }
+
+     protected override async Task OnInitializedAsync()
+    {
+        isLoading(true);
+        orderModel = await http.GetFromJsonAsync<OrderModel>("api/Order/GetOrder/" + orderID);
+        isLoading(false);
+
+        if (orderModel == null)
+            itemsInOrder = false;
+        else
+        {
+            itemsInOrder = true;
+        }
+    }
+
+    private async Task MarkAsReceived()
+    {
+        var parameters = new DialogParameters();
+        parameters.Add("ContentText", "Do you really want to mark this order as shipped? This process cannot be undone.");
+        parameters.Add("ButtonText", "Mark as Shipped");
+        parameters.Add("color", Color.Error);
+
+        var options = new DialogOptions() {DisableBackdropClick = true,  };
+        var result = await DS.Show<DialogBox>("Mark this order as shipped", parameters, options).Result;
+
+        if (!result.Cancelled)
+        {
+            var response = await http.GetFromJsonAsync<OrderModel>("api/Order/MarkAsShipped/" + orderID);
+
+            if (response == null)
+            {
+                SB.Add("Order status changing faild. Please try again.");
+            }
+            else
+            {
+                SB.Add("Order status updated");
+                orderModel = response;
+            }
+        }     
+    }
 }
