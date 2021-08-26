@@ -47,7 +47,6 @@ namespace ApeGama.Shared
         [Required]
         [Column("user_status")]
         public bool? UserStatus { get; set; }
-
         [InverseProperty("Sup")]
         public virtual OnlineShopModel OnlineShop { get; set; }
         [InverseProperty(nameof(OrderModel.Cus))]

@@ -97,6 +97,7 @@
     {
         if (validPassword && validTP)
         {
+            userModel.UserStatus = true;
             userModel.UserPass = passVal;
             userModel.ShaEnc();
 
