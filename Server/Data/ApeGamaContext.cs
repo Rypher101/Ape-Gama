@@ -1,8 +1,6 @@
-﻿using System;
-using System.Configuration;
-using ApeGama.Shared;
+﻿using ApeGama.Shared;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Metadata;
+using System.Configuration;
 
 #nullable disable
 
@@ -19,6 +17,7 @@ namespace ApeGama.Server.Data
         {
         }
 
+        public virtual DbSet<ComplaintModel> Complaints { get; set; }
         public virtual DbSet<ImageModel> Images { get; set; }
         public virtual DbSet<OnlineShopModel> OnlineShops { get; set; }
         public virtual DbSet<OrderModel> Orders { get; set; }
@@ -38,6 +37,26 @@ namespace ApeGama.Server.Data
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.HasAnnotation("Relational:Collation", "SQL_Latin1_General_CP1_CI_AS");
+
+            modelBuilder.Entity<ComplaintModel>(entity =>
+            {
+                entity.HasOne(d => d.Order)
+                    .WithMany(p => p.Complaints)
+                    .HasForeignKey(d => d.OrderId)
+                    .HasConstraintName("FK_Complaint_Order");
+
+                entity.HasOne(d => d.Shop)
+                    .WithMany(p => p.Complaints)
+                    .HasForeignKey(d => d.ShopId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("FK_Complaint_Online_Shop");
+
+                entity.HasOne(d => d.User)
+                    .WithMany(p => p.Complaints)
+                    .HasForeignKey(d => d.UserId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("FK_Complaint_User");
+            });
 
             modelBuilder.Entity<ImageModel>(entity =>
             {

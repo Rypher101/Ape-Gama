@@ -193,8 +193,8 @@ namespace ApeGama.Server.Controllers
             }
             catch (DbUpdateConcurrencyException)
             {
-               return NotFound();
-            }   
+                return NotFound();
+            }
         }
 
         // POST: api/Product

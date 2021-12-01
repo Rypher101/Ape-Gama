@@ -32,6 +32,7 @@
                         <ul>
                             <li><a href="/login_customer" class="@LoginCus">As a Customer</a></li>
                             <li><a href="/login_supplier" class="@LoginSup">As a Supplier</a></li>
+                            <li><a href="/login_admin" class="@LoginAdmNav">As a Admin</a></li>
                         </ul>
                     </li>
                 </NotAuthorized>
@@ -42,7 +43,7 @@
 @code {
     [Parameter]
     public string NavItem { get; set; }
-    public string Home, LoginCus, LoginSup, OnlineShop, Marketplace, Profile, Cart, Orders;
+    public string Home, LoginCus, LoginSup, OnlineShop, Marketplace, Profile, Cart, Orders, LoginAdmNav;
     private string oldShop="none";
 
     protected override async Task OnInitializedAsync()
@@ -72,6 +73,9 @@
                 break;
             case "Orders":
                 Orders = "active";
+                break;
+            case "LoginAdmNav":
+                LoginAdmNav = "active";
                 break;
             default:
                 break;

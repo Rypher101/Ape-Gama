@@ -8,6 +8,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using MailKit.Net.Smtp;
+using MimeKit;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -34,7 +36,7 @@ namespace ApeGama.Server.Controllers
                     return orders;
 
                 orders = _context.Orders.Where(e => e.CusId == uid).Include(e => e.Shop).ToList();
-                orders = orders.OrderBy(e => e.OrderStatus).ThenByDescending(e=>e.OrderId).ToList();
+                orders = orders.OrderBy(e => e.OrderStatus).ThenByDescending(e => e.OrderId).ToList();
 
                 return orders;
             }
@@ -95,7 +97,7 @@ namespace ApeGama.Server.Controllers
         {
             try
             {
-                var cartDetails =new List<CartModel>();
+                var cartDetails = new List<CartModel>();
                 var filterCart = new List<CartModel>();
                 var sessionCart = HttpContext.Session.GetString("Cart");
                 var cusID = HttpContext.Session.GetInt32("UID");
@@ -107,7 +109,7 @@ namespace ApeGama.Server.Controllers
                     OrderStatus = 1,
                     OrderAddress = model.address,
                     OrderContact = model.contact
-                    
+
                 };
 
                 _context.Orders.Add(order);
@@ -132,7 +134,7 @@ namespace ApeGama.Server.Controllers
                         Qty = item.qty,
                         UnitPrice = tempProd.ProdPrice
                     };
-                    
+
                     _context.OrderProducts.Add(temp);
                     cartDetails.Remove(item);
                 }
@@ -157,8 +159,8 @@ namespace ApeGama.Server.Controllers
                 var shopID = HttpContext.Session.GetInt32("ShopID");
                 if (shopID == 0)
                     return null;
-                
-                var modelList = _context.Orders.Where(e=>e.ShopId == shopID).OrderBy(e=>e.OrderStatus).ThenByDescending(e=>e.OrderId).Include(e=>e.Cus).ToList();
+
+                var modelList = _context.Orders.Where(e => e.ShopId == shopID).OrderBy(e => e.OrderStatus).ThenByDescending(e => e.OrderId).Include(e => e.Cus).ToList();
                 return modelList;
             }
             catch (Exception)
@@ -187,6 +189,7 @@ namespace ApeGama.Server.Controllers
                     _context.Attach(temp);
                     _context.Entry(temp).Property(e => e.OrderStatus).IsModified = true;
                     await _context.SaveChangesAsync();
+                    SendDeliveryEmail(temp.OrderId);
                 }
                 else
                 {
@@ -197,16 +200,58 @@ namespace ApeGama.Server.Controllers
 
                 foreach (var item in temp.OrderProducts)
                 {
-                    var tempProd = await _context.Products.AsNoTracking().Where(e=>e.ProdId == item.ProdId).FirstOrDefaultAsync();
+                    var tempProd = await _context.Products.AsNoTracking().Where(e => e.ProdId == item.ProdId).FirstOrDefaultAsync();
                     tempProd.ProdStock = (int)(tempProd.ProdStock - item.Qty);
                     _context.Entry(tempProd).State = EntityState.Modified;
-                    await _context.SaveChangesAsync();  
+                    await _context.SaveChangesAsync();
                 }
                 return temp;
             }
             catch (Exception)
             {
                 return null;
+            }
+        }
+
+        private void SendDeliveryEmail(int orderId)
+        {
+            try
+            {
+                var shopID = HttpContext.Session.GetInt32("ShopID");
+                var shop = _context.OnlineShops.Where(e => e.ShopId == shopID).Include(e => e.Sup).FirstOrDefault();
+
+                var message = new MimeMessage();
+                var from = new MailboxAddress(shop.ShopName, shop.Sup.UserEmail);
+                message.From.Add(from);
+
+                var order = _context.Orders.Where(e => e.OrderId == orderId).Include(e => e.Cus).Include(e => e.OrderProducts).ThenInclude(e => e.Prod).FirstOrDefault();
+                var to = new MailboxAddress(order.Cus.UserName, order.Cus.UserEmail);
+                message.To.Add(to);
+
+                message.Subject = "Your order has been dispatched. Order Number : " + order.OrderId;
+
+                var body = "Dear Customer," + Environment.NewLine + Environment.NewLine +  "Your order number (" + order.OrderId + ") has been dispatched." + Environment.NewLine + Environment.NewLine + "Order contains these products, ";
+                foreach (var item in order.OrderProducts)
+                {
+                    body = body + Environment.NewLine + item.Prod.ProdName + " : " + item.Qty;
+                }
+                body = body + Environment.NewLine + Environment.NewLine + "Thank You!";
+
+                var bodyBuilder = new BodyBuilder();
+                bodyBuilder.TextBody = body;
+                message.Body = bodyBuilder.ToMessageBody();
+
+                var client = new SmtpClient();
+                client.Connect("smtp.gmail.com", 465, true);
+                client.Authenticate("gamaape3@gmail.com", "apegama123");
+
+                client.Send(message);
+                client.Disconnect(true);
+                client.Dispose();
+            }
+            catch (Exception)
+            {
+                throw;
             }
         }
     }

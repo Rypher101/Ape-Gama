@@ -22,19 +22,22 @@
                                     <MudText Typo="Typo.h5" Style="padding-bottom:10px">@item.ProdName </MudText>
                                     <MudText Typo="Typo.body2" Style="padding-bottom:10px">@item.ProdDescription</MudText>
                                     <MudDivider />
-                                    @{ string stock;
+                                    @{
+                                        string stock;
+                                        Color clr;
                                         if (item.ProdStock > 0)
                                         {
                                             stock = "IN STOCK";
+                                            clr = Color.Default;
                                         }
                                         else
                                         {
-                                            stock = "<style='color:red'>OUT OF STOCK</style>";
+                                            stock = "OUT OF STOCK";
+                                            clr = Color.Error;
                                         }
-
                                     }
-                                    <MudText Typo="Typo.subtitle2" Style="padding-bottom:10px; padding-top:10px">Stock : @stock</MudText>
-                                    <MudText Typo="Typo.subtitle2" Style="padding-bottom:10px">Price : Rs. @item.ProdPrice</MudText>
+                                    <MudText Typo="Typo.subtitle2" Style="padding-bottom:10px; padding-top:10px">Price : Rs. @item.ProdPrice</MudText>
+                                    <MudText Typo="Typo.subtitle2" Style="padding-bottom:10px;" Color="@clr">@stock</MudText>
                                 </MudCardContent>
                                 <MudCardActions Style="align-content:flex-end;">
                                     <MudButton Variant="Variant.Text" Color="Color.Primary" OnClick="@(e=>ViewProduct(@item.ProdId))" Style="margin-left: auto;margin-right: 0;">View</MudButton>

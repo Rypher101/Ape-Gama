@@ -1,0 +1,77 @@
+﻿@page "/login_admin"
+@page "/login_admin/{ErrorMsg}/{InfoMsg}"
+@inject NavigationManager UriHelper
+@inject ISnackbar SB
+@inject HttpClient http
+@inject AuthenticationStateProvider AuthStateProvider
+
+<div id="wrapper">
+    <HomeHeader />
+    <div class="main">
+        <div class="row align-content-center" style="padding-top:70px; padding-bottom:70px">
+            <div class="col-md-4 offset-4">
+                <h2 class="h2"><center>Admin Login</center></h2>
+                <EditForm Model="@loginModel" OnValidSubmit="@HandleValidSubmit">
+                    <div class="form-group">
+                        <input type="email" class="form-control rounded-left" placeholder="Email" required @bind-value="loginModel.userEmail">
+                    </div>
+                    <div class="form-group">
+                        <input type="password" class="form-control rounded-left" placeholder="Password" required @bind-value="passVal">
+                    </div>
+                    <div class="form-group align-items-center">
+                        <div class="justify-content-end">
+                            <button class="primary" style="width:100%">Login</button>
+                        </div>
+                    </div>
+                </EditForm>
+                @*<div class="align-items-center">
+                    <h4 class="h4"><center><b>Or</b></center></h4>
+                </div>
+                <br />
+                <button class="primary" style="width:100%" @onclick="@(()=>UriHelper.NavigateTo("/register_customer", forceLoad: true))">Sign Up</button>*@
+            </div>
+        </div>
+    </div>
+    <HomeFooter></HomeFooter>
+</div>
+<NavMenu NavItem="LoginAdmNav" />
+
+@code {
+    [Parameter]
+    public string ErrorMsg { get; set; }
+    [Parameter]
+    public string InfoMsg { get; set; }
+    private LoginModel loginModel = new LoginModel();
+    private string passVal;
+
+    protected override void OnInitialized()
+    {
+        if (!string.IsNullOrWhiteSpace(ErrorMsg))
+        {
+            SB.Add(ErrorMsg, Severity.Error);
+        }
+
+        if (!string.IsNullOrWhiteSpace(InfoMsg))
+        {
+            SB.Add(InfoMsg, Severity.Success);
+        }
+    }
+
+    private async Task HandleValidSubmit()
+    {
+        loginModel.userPassword = passVal;
+        loginModel.ShaEnc();
+
+        var response = await http.PostAsJsonAsync("api/Login/3", loginModel);
+        if (response.IsSuccessStatusCode)
+        {
+            await AuthStateProvider.GetAuthenticationStateAsync();
+            UriHelper.NavigateTo("/admin_dashboard");
+        }
+        else
+        {
+            SB.Add("Invalid user credentials!", Severity.Error);
+        }
+    }
+
+}

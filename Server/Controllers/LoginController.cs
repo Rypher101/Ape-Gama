@@ -69,6 +69,21 @@ namespace ApeGama.Server.Controllers
                         throw;
                     }
 
+                case 3:
+                    user = await _context.Users.FirstOrDefaultAsync(x => x.UserEmail == loginModel.userEmail && x.UserPass == loginModel.userPassword && x.UserFlag == 3);
+                    if (user == null)
+                    {
+                        return NotFound();
+                    }
+                    else
+                    {
+                        HttpContext.Session.SetInt32("UID", user.UserId);
+                        HttpContext.Session.SetString("UName", user.UserName);
+                        HttpContext.Session.SetString("UEmail", user.UserEmail);
+                        HttpContext.Session.SetInt32("URole", 3);
+                        return Ok();
+                    }
+
                 default:
                     return NotFound();
             }

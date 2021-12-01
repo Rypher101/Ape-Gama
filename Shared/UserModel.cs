@@ -53,6 +53,8 @@ namespace ApeGama.Shared
         public virtual ICollection<OrderModel> Orders { get; set; }
         [InverseProperty(nameof(ReviewModel.User))]
         public virtual ICollection<ReviewModel> Reviews { get; set; }
+        [InverseProperty(nameof(ComplaintModel.User))]
+        public virtual ICollection<ComplaintModel> Complaints { get; set; }
 
         public void ShaEnc(bool isNewPass = false)
         {

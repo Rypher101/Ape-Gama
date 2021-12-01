@@ -44,5 +44,7 @@ namespace ApeGama.Shared
         public virtual OnlineShopModel Shop { get; set; }
         [InverseProperty(nameof(OrderProductModel.Order))]
         public virtual ICollection<OrderProductModel> OrderProducts { get; set; }
+        [InverseProperty(nameof(ComplaintModel.Order))]
+        public virtual ICollection<ComplaintModel> Complaints { get; set; }
     }
 }

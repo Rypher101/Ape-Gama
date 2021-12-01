@@ -1,0 +1,33 @@
+﻿@inject AuthenticationStateProvider AuthStateProvider
+@inject HttpClient Http
+@inject NavigationManager UriHelper
+
+<MudAppBar Elevation="1">
+        <MudIconButton Icon="@Icons.Material.Outlined.Menu" Color="Color.Info" Edge="Edge.Start" OnClick="@ToggleDrawer" Style="color:white !important; box-shadow:none !important"/>
+    </MudAppBar>
+    <MudDrawer @bind-Open="@open" ClipMode="DrawerClipMode.Always" Elevation="1"> 
+        <MudNavMenu>   
+            <div class="admin_nav_menu">
+                <MudNavLink Href="/admin_dashboard"><b>Dashboard</b></MudNavLink>
+                <MudNavLink Href="/admin_complaints"><b>Complaints</b></MudNavLink>
+                @*<MudNavLink Href="/billing" Disabled="true">Billing</MudNavLink>*@
+                <MudNavLink OnClick="LogOut"><b>Log Out</b></MudNavLink>
+            </div>
+        </MudNavMenu>
+    </MudDrawer>
+
+@code{
+    bool open = true;
+
+    void ToggleDrawer()
+    {
+        open = !open;
+    }
+
+    async void LogOut()
+    {
+        await Http.DeleteAsync("api/Login");
+        await AuthStateProvider.GetAuthenticationStateAsync();
+        UriHelper.NavigateTo("/");
+    }
+}

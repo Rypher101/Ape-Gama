@@ -31,6 +31,14 @@ namespace ApeGama.Client.Services
                         new Claim(ClaimTypes.Role, "Customer")
                     }, "Customer");
                 }
+                else if (model.userType == 3)
+                {
+                    identity = new ClaimsIdentity(new[] {
+                        new Claim(ClaimTypes.Name, model.userName),
+                        new Claim(ClaimTypes.Email, model.userEmail),
+                        new Claim(ClaimTypes.Role, "Admin")
+                    }, "Admin");
+                }
                 else
                 {
                     identity = new ClaimsIdentity(new[] {
