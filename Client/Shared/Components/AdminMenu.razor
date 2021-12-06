@@ -3,31 +3,31 @@
 @inject NavigationManager UriHelper
 
 <MudAppBar Elevation="1">
-        <MudIconButton Icon="@Icons.Material.Outlined.Menu" Color="Color.Info" Edge="Edge.Start" OnClick="@ToggleDrawer" Style="color:white !important; box-shadow:none !important"/>
-    </MudAppBar>
-    <MudDrawer @bind-Open="@open" ClipMode="DrawerClipMode.Always" Elevation="1"> 
-        <MudNavMenu>   
-            <div class="admin_nav_menu">
-                <MudNavLink Href="/admin_dashboard"><b>Dashboard</b></MudNavLink>
-                <MudNavLink Href="/admin_complaints"><b>Complaints</b></MudNavLink>
-                @*<MudNavLink Href="/billing" Disabled="true">Billing</MudNavLink>*@
-                <MudNavLink OnClick="LogOut"><b>Log Out</b></MudNavLink>
-            </div>
-        </MudNavMenu>
-    </MudDrawer>
+	<MudIconButton Icon="@Icons.Material.Outlined.Menu" Color="Color.Info" Edge="Edge.Start" OnClick="@ToggleDrawer" Style="color:white !important; box-shadow:none !important" /> <MudAppBarSpacer /> Ape Gama
+</MudAppBar>
+<MudDrawer @bind-Open="@open" ClipMode="DrawerClipMode.Always" Elevation="1">
+	<MudNavMenu>
+		<div class="admin_nav_menu">
+			<MudNavLink Href="/admin_dashboard"><b>Dashboard</b></MudNavLink>
+			<MudNavLink Href="/admin_complaints"><b>Complaints</b></MudNavLink>
+			@*<MudNavLink Href="/billing" Disabled="true">Billing</MudNavLink>*@
+			<MudNavLink Href="#"><b><div @onclick="LogOut">Log Out</div></b></MudNavLink>
+		</div>
+	</MudNavMenu>
+</MudDrawer>
 
-@code{
-    bool open = true;
+@code {
+	bool open = true;
 
-    void ToggleDrawer()
-    {
-        open = !open;
-    }
+	void ToggleDrawer()
+	{
+		open = !open;
+	}
 
-    async void LogOut()
-    {
-        await Http.DeleteAsync("api/Login");
-        await AuthStateProvider.GetAuthenticationStateAsync();
-        UriHelper.NavigateTo("/");
-    }
+	async void LogOut()
+	{
+		await Http.DeleteAsync("api/Login");
+		await AuthStateProvider.GetAuthenticationStateAsync();
+		UriHelper.NavigateTo("/");
+	}
 }

@@ -98,6 +98,10 @@
                             <button class="primary" style="width:100%" @onclick="MarkAsReceived" >Mark as received</button>
                         </div>
                     } 
+                    <br />
+                    <div class="form-group">
+                            <button class="secondary" style="width:100%" @onclick="FileComplaint" >File a Complaint</button>
+                    </div>
                 }else{
                     <h5 class="h5"><center>Sorry, There are no orders found.</center></h5>
                 }
@@ -135,7 +139,7 @@
         }
     }
 
-     protected override async Task OnInitializedAsync()
+    protected override async Task OnInitializedAsync()
     {
         isLoading(true);
         orderModel = await http.GetFromJsonAsync<OrderModel>("api/Order/GetOrder/" + orderID);
@@ -172,6 +176,21 @@
                 SB.Add("Order status updated");
                 orderModel = response;
             }
+        }     
+    }
+
+    private async Task FileComplaint(){
+        var parameters = new DialogParameters();
+        parameters.Add("ContentText", "Do you want to file a complaint about this order?");
+        parameters.Add("ButtonText", "Confirm");
+        parameters.Add("color", Color.Error);
+
+        var options = new DialogOptions() {DisableBackdropClick = true,  };
+        var result = await DS.Show<DialogBox>("File a complaint", parameters, options).Result;
+
+        if (!result.Cancelled)
+        {
+            UriHelper.NavigateTo("/make_complaint/" + orderID);
         }     
     }
 }

@@ -121,6 +121,7 @@
 	{
 		isLoading(true);
 		cartModel = await http.GetFromJsonAsync<List<CartModel>>("api/Cart/GetCartDetails");
+		_ = await http.GetFromJsonAsync<NotificationModel>("api/Notification/RemoveNotification/" + 1);
 		isLoading(false);
 
 		if (cartModel == null || cartModel.Count == 0)

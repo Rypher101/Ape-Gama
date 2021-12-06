@@ -11,6 +11,7 @@ namespace ApeGama.Shared
     {
         [Key]
         [Column("comp_id")]
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int CompId { get; set; }
         [Column("user_id")]
         public int UserId { get; set; }

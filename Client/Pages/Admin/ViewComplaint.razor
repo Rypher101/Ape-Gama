@@ -1,0 +1,91 @@
+﻿@page "/view_complaint/{complaintID}"
+@inject NavigationManager UriHelper
+@inject ISnackbar SB
+@inject HttpClient http
+@inject IDialogService DS
+
+<MudLayout>
+	<AdminMenu />
+
+	<MudMainContent>
+		<MudContainer>
+			<MudGrid Class="pt-4">
+				<MudItem xs="12">
+					<MudPaper Class="d-flex-column mud-width-full" Elevation="3">
+						<MudText Class="pt-2" Align="Align.Center"><h1>Complaint</h1></MudText>
+						<MudContainer Class="px-10">
+							<div class="form-group">
+								<h5 class="h5"><i>Claiment</i></h5>
+								<div class="col-md-11 offset-1"><h6 class="h6"><b>@claiment</b></h6></div>
+							</div>
+							<br />
+							<div class="form-group">
+								<h5 class="h5"><i>Shop</i></h5>
+								<div class="col-md-11 offset-1"><h6 class="h6"><b>@shopName</b></h6></div>
+							</div>
+							<br />
+							<div class="form-group">
+								<h5 class="h5"><i>Description</i></h5>
+								<div class="col-md-11 offset-1"><h6 class="h6"><b>@complaint.Details</b></h6></div>
+							</div>
+							<br />
+							<br />
+							@if (complaint.Status == 1)
+							{
+								<div class="form-group">
+									<div class="row pl-10 pb-6">
+										<button class="primary" style="width:100%" @onclick="BanTheSupplier">Ban the Supplier</button>
+									</div>
+								</div>
+							}
+						</MudContainer>
+					</MudPaper>
+				</MudItem>
+			</MudGrid>
+		</MudContainer>
+	</MudMainContent>
+</MudLayout>
+
+
+@code {
+	[Parameter]
+	public string complaintID { get; set; }
+	private ComplaintModel complaint = new();
+	private string pointerEvent, shopName, claiment;
+	private double opacity = 1;
+	private int qty = 0, avgRating = 0;
+	private bool notOos = true;
+
+	protected override async Task OnInitializedAsync()
+	{
+		complaint = await http.GetFromJsonAsync<ComplaintModel>("api/Complaint/GetComplaint/" + complaintID);
+		shopName = complaint.Shop.ShopName;
+		claiment = complaint.User.UserName;
+	}
+
+	private async Task BanTheSupplier()
+	{
+		var parameters = new DialogParameters();
+		parameters.Add("ContentText", "Do you want ban this supplier? This process cannot be undone.");
+		parameters.Add("ButtonText", "Confirm");
+		parameters.Add("color", Color.Error);
+
+		var options = new DialogOptions() { DisableBackdropClick = true, };
+		var result = await DS.Show<DialogBox>("Ban supplier", parameters, options).Result;
+
+		if (!result.Cancelled)
+		{
+			var response = await http.PostAsJsonAsync<ComplaintModel>("api/Complaint/BanSupplier/", complaint);
+			if (response.IsSuccessStatusCode)
+			{
+				var oID = await response.Content.ReadAsStringAsync();
+				SB.Add("Supplier Baned");
+				UriHelper.NavigateTo("/admin_complaints");
+			}
+			else
+			{
+				SB.Add("Error occored while banning the order. Please try again!", Severity.Error);
+			}
+		}
+	}
+}

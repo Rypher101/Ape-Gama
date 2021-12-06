@@ -66,6 +66,17 @@ namespace ApeGama.Server.Controllers
 
                 cartModel.Add(model);
                 status = 1;
+
+                var uid = (int)HttpContext.Session.GetInt32("UID");
+                var notifi = _context.Notifications.Where(e => e.UserId == uid && e.Category == 1).FirstOrDefault();
+                if (notifi == null)
+                {
+                    var temp2 = new NotificationModel();
+                    temp2.UserId = uid;
+                    temp2.Category = 1;
+                    _context.Add(temp2);
+                    _context.SaveChanges();
+                }
             }
 
             HttpContext.Session.SetString("Cart", JsonConvert.SerializeObject(cartModel));

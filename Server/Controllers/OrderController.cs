@@ -139,6 +139,16 @@ namespace ApeGama.Server.Controllers
                     cartDetails.Remove(item);
                 }
 
+                var shop = _context.OnlineShops.Where(e => e.ShopId == order.ShopId).FirstOrDefault();
+                var notifi = _context.Notifications.Where(e => e.UserId == shop.SupId && e.Category == 2).FirstOrDefault();
+                if(notifi == null)
+				{
+                    var temp = new NotificationModel();
+                    temp.UserId = shop.SupId;    
+                    temp.Category = 2;
+                    _context.Add(temp);
+				}
+
                 _context.SaveChanges();
 
                 HttpContext.Session.SetString("Cart", JsonConvert.SerializeObject(cartDetails));
@@ -205,6 +215,17 @@ namespace ApeGama.Server.Controllers
                     _context.Entry(tempProd).State = EntityState.Modified;
                     await _context.SaveChangesAsync();
                 }
+
+                var notifi = _context.Notifications.Where(e => e.UserId == temp.CusId && e.Category == 2).FirstOrDefault();
+                if (notifi == null)
+                {
+                    var temp2 = new NotificationModel();
+                    temp2.UserId = temp.CusId;
+                    temp2.Category = 2;
+                    _context.Add(temp2);
+                    _context.SaveChanges();
+                }
+
                 return temp;
             }
             catch (Exception)

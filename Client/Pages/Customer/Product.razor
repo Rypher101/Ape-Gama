@@ -45,18 +45,46 @@
 						}
 					</MudGrid>
 				</div>
+				<div class="form-group">
+					<MudExpansionPanels Elevation="4">
+						<MudExpansionPanel Text="Reviews" MaxHeight="400">
+							<TitleContent>
+								<MudContainer Class="d-inline-flex">
+									<h5 class="h5"><i>Reviews</i></h5>
+									<MudRating SelectedValue="avgRating" ReadOnly="true" Class="mr-2 ml-auto" Color="Color.Primary" />
+								</MudContainer>
+							</TitleContent>
+							<ChildContent>
+								<MudContainer Style="max-height: 370px; overflow-y: scroll">
+									@foreach (var item in reviews)
+									{
+										<MudPaper Elevation="3" Class="my-5">
+											<MudField Variant="Variant.Outlined" Class="px-3 py-3">
+												<MudRating SelectedValue="item.Rate" ReadOnly="true" Color="Color.Primary" /><br /><br />
+												@item.Review1
+											</MudField>
+										</MudPaper>
+									}
+								</MudContainer>
+							</ChildContent>
+						</MudExpansionPanel>
+					</MudExpansionPanels>
+				</div>
 				<br />
 				<br />
-				@if (notOos)
-				{
-					<AuthorizeView Roles="Customer">
-						<Authorized>
-							<div class="form-group">
-								<button class="primary" style="width:100%" @onclick="AddToCart">Add to Cart</button>
-							</div>
-						</Authorized>
-					</AuthorizeView>
-				}
+				<div class="form-group">
+					<div class="row">
+						<AuthorizeView Roles="Customer">
+							<Authorized>
+								<button class="primary" style="width:47%" @onclick="@(()=>UriHelper.NavigateTo("/review_product/" + productModel.ProdId, forceLoad: true))">Add Review</button>
+								@if (notOos)
+								{
+									<button class="primary mr-2 ml-auto" style="width:47%" @onclick="AddToCart">Add to Cart</button>
+								}
+							</Authorized>
+						</AuthorizeView>
+					</div>
+				</div>
 			</div>
 		</div>
 	</div>
@@ -71,9 +99,10 @@
 	[Parameter]
 	public string prodID { get; set; }
 	private ProductModel productModel = new ProductModel();
+	private List<ReviewModel> reviews = new();
 	private string stock, price, pointerEvent, loadingIcon = "none", qtyTemp = "0";
 	private double opacity = 1;
-	private int qty = 0;
+	private int qty = 0, avgRating = 0;
 	private bool notOos = true;
 
 	void isLoading(bool value)
@@ -96,7 +125,17 @@
 	{
 		isLoading(true);
 		productModel = await http.GetFromJsonAsync<ProductModel>("api/Product/GetProductModel/" + prodID);
+		reviews = await http.GetFromJsonAsync<List<ReviewModel>>("api/Review/GetReviews/" + prodID);
 		isLoading(false);
+
+		if (reviews.Count > 0)
+		{
+			foreach (var item in reviews)
+			{
+				avgRating += item.Rate;
+			}
+			avgRating = avgRating / reviews.Count();
+		}
 
 		if (productModel.ProdStock < 1) notOos = false;
 		qtyTemp = productModel.qty.ToString();
@@ -131,6 +170,7 @@
 			if (response.StatusCode == System.Net.HttpStatusCode.OK)
 			{
 				SB.Add("Item added to cart");
+				StateHasChanged();
 			}
 			else if (response.StatusCode == System.Net.HttpStatusCode.Accepted)
 			{

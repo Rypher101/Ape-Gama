@@ -2,114 +2,144 @@
 @inject HttpClient Http
 @inject NavigationManager UriHelper
 
-<nav id="menu">
-    <div class="inner">
-        <h2>Menu</h2>
-        <ul>
-            <li><a href="/" class="@Home">Home</a></li>
-            <AuthorizeView Roles="Supplier">
-                <Authorized>
-                    <li style="display:@oldShop"><a href="/online_shop" class="@OnlineShop">Online Shop</a></li>
-                    <li><a href="/view_orders_Supplier" class="@Orders">Orders</a></li>
-                </Authorized>
-            </AuthorizeView>
-            <li><a href="/marketplace" class="@Marketplace">Marketplace</a></li>
-            <AuthorizeView Roles="Customer">
-                <Authorized>
-                    <li><a href="/view_cart" class="@Cart">Cart</a></li>
-                    <li><a href="/view_orders" class="@Orders">Orders</a></li>
-                </Authorized>
-            </AuthorizeView>
-            <AuthorizeView>
-                <Authorized>
-                    <li><a href="/profile" class="@Profile">Profile</a></li>
-                    <li><a @onclick="LogOut" href="">Logout</a></li>
-                </Authorized>
-                <NotAuthorized>
-                    <li>
-                        <a class="dropdown-toggle">Login</a>
+<style>
+	.notification {
+  color: white;
+  text-decoration: none;
+  padding: 15px 26px;
+  position: relative;
+}
 
-                        <ul>
-                            <li><a href="/login_customer" class="@LoginCus">As a Customer</a></li>
-                            <li><a href="/login_supplier" class="@LoginSup">As a Supplier</a></li>
-                            <li><a href="/login_admin" class="@LoginAdmNav">As a Admin</a></li>
-                        </ul>
-                    </li>
-                </NotAuthorized>
-            </AuthorizeView>
-        </ul>
-    </div><a class="close" href="#menu">Close</a>
+	 .notification .badge {
+  position: absolute;
+  right: -10px;
+  padding: 5px 10px;
+  border-radius: 50%;
+  background: red;
+  color: red;
+}
+
+</style>
+<nav id="menu">
+	<div class="inner">
+		<h2>Menu</h2>
+		<ul>
+			<li><a href="/" class="@Home">Home</a></li>
+			<AuthorizeView Roles="Supplier">
+				<Authorized>
+					<li style="display:@oldShop"><a href="/online_shop" class="@OnlineShop">Online Shop</a></li>
+					<li><a href="/view_orders_Supplier" class="@Orders"><span>Orders</span><MudIcon Icon="@Icons.Material.Filled.Circle" Class="badge" Size="Size.Large" Style="@orderNotifi" Color="Color.Warning"/></a></li>
+				</Authorized>
+			</AuthorizeView>
+			<li><a href="/marketplace" class="@Marketplace notification"><span>Marketplace</span></a></li>
+			<AuthorizeView Roles="Customer">
+				<Authorized>
+					<li><a href="/view_cart" class="@Cart"><span>Cart</span><MudIcon Icon="@Icons.Material.Filled.Circle" Class="badge" Size="Size.Large" Style="@cartNotifi" Color="Color.Warning"/></a></li>
+					<li><a href="/view_orders" class="@Orders"><span>Orders</span><MudIcon Icon="@Icons.Material.Filled.Circle" Class="badge" Size="Size.Large" Style="@orderNotifi" Color="Color.Warning"/></a></li>
+				</Authorized>
+			</AuthorizeView>
+			<AuthorizeView>
+				<Authorized>
+					<li><a href="/profile" class="@Profile">Profile</a></li>
+					<li><a @onclick="LogOut" href="">Logout</a></li>
+				</Authorized>
+				<NotAuthorized>
+					<li>
+						<a class="dropdown-toggle">Login</a>
+
+						<ul>
+							<li><a href="/login_customer" class="@LoginCus">As a Customer</a></li>
+							<li><a href="/login_supplier" class="@LoginSup">As a Supplier</a></li>
+							<li><a href="/login_admin" class="@LoginAdmNav">As a Admin</a></li>
+						</ul>
+					</li>
+				</NotAuthorized>
+			</AuthorizeView>
+		</ul>
+	</div><a class="close" href="#menu">Close</a>
 </nav>
 @code {
-    [Parameter]
-    public string NavItem { get; set; }
-    public string Home, LoginCus, LoginSup, OnlineShop, Marketplace, Profile, Cart, Orders, LoginAdmNav;
-    private string oldShop="none";
+	[Parameter]
+	public string NavItem { get; set; }
+	public string Home, LoginCus, LoginSup, OnlineShop, Marketplace, Profile, Cart, Orders, LoginAdmNav;
+	private string cartNotifi = "display: none", orderNotifi = "display: none";
+	private string oldShop = "none";
+	private List<NotificationModel> notifications = new();
 
-    protected override async Task OnInitializedAsync()
-    {
-        switch (NavItem)
-        {
-            case "HomeNav":
-                Home = "active";
-                break;
-            case "LoginCusNav":
-                LoginCus = "active";
-                break;
-            case "LoginSupNav":
-                LoginSup = "active";
-                break;
-            case "OnlineShopNav":
-                OnlineShop = "active";
-                break;
-            case "Marketplace":
-                Marketplace = "active";
-                break;
-            case "Profile":
-                Profile = "active";
-                break;
-            case "Cart":
-                Cart = "active";
-                break;
-            case "Orders":
-                Orders = "active";
-                break;
-            case "LoginAdmNav":
-                LoginAdmNav = "active";
-                break;
-            default:
-                break;
-        }
+	protected override async Task OnInitializedAsync()
+	{
+		switch (NavItem)
+		{
+			case "HomeNav":
+				Home = "active";
+				break;
+			case "LoginCusNav":
+				LoginCus = "active";
+				break;
+			case "LoginSupNav":
+				LoginSup = "active";
+				break;
+			case "OnlineShopNav":
+				OnlineShop = "active";
+				break;
+			case "Marketplace":
+				Marketplace = "active";
+				break;
+			case "Profile":
+				Profile = "active";
+				break;
+			case "Cart":
+				Cart = "active";
+				break;
+			case "Orders":
+				Orders = "active";
+				break;
+			case "LoginAdmNav":
+				LoginAdmNav = "active";
+				break;
+			default:
+				break;
+		}
 
-        var response = await Http.GetAsync("api/Login/1");
-        if (response.IsSuccessStatusCode)
-        {
-            IsNewShop(false);
-        }
-        else
-        {
-            IsNewShop(true);
-        }
+		var response = await Http.GetAsync("api/Login/1");
+		if (response.IsSuccessStatusCode)
+		{
+			IsNewShop(false);
+		}
+		else
+		{
+			IsNewShop(true);
+		}
 
-        base.OnInitialized();
-    }
+		var notification = await Http.GetFromJsonAsync<List<NotificationModel>>("api/Notification/GetNotofications");
 
-    async void LogOut()
-    {
-        await Http.DeleteAsync("api/Login");
-        await AuthStateProvider.GetAuthenticationStateAsync();
-        UriHelper.NavigateTo("/");
-    }
+		foreach (var item in notification)
+		{
+			if (item.Category == 1) cartNotifi = "";
+			if (item.Category == 2) orderNotifi = "";
+		}
 
-    public void IsNewShop(bool value)
-    {
-        if (value)
-        {
-            oldShop = "none";
-        }
-        else
-        {
-            oldShop = "";
-        }
-    }
+		base.OnInitialized();
+	}
+
+	async void LogOut()
+	{
+		await Http.DeleteAsync("api/Login");
+		await AuthStateProvider.GetAuthenticationStateAsync();
+		UriHelper.NavigateTo("/");
+	}
+
+	public void IsNewShop(bool value)
+	{
+		if (value)
+		{
+			oldShop = "none";
+		}
+		else
+		{
+			oldShop = "";
+		}
+	}
+
+	
 }

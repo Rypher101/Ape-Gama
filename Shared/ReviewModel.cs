@@ -17,7 +17,7 @@ namespace ApeGama.Shared
         [Column("review", TypeName = "text")]
         public string Review1 { get; set; }
         [Column("rate")]
-        public int? Rate { get; set; }
+        public int Rate { get; set; }
 
         [ForeignKey(nameof(ProdId))]
         [InverseProperty(nameof(ProductModel.Reviews))]

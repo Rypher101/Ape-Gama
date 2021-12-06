@@ -55,7 +55,8 @@ namespace ApeGama.Shared
         public virtual ICollection<ReviewModel> Reviews { get; set; }
         [InverseProperty(nameof(ComplaintModel.User))]
         public virtual ICollection<ComplaintModel> Complaints { get; set; }
-
+        [InverseProperty(nameof(NotificationModel.User))]
+        public virtual ICollection<NotificationModel> Notifications { get; set; }
         public void ShaEnc(bool isNewPass = false)
         {
             using (SHA256 sha256Hash = SHA256.Create())

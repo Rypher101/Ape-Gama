@@ -1,0 +1,81 @@
+﻿@page "/make_complaint/{orderID}"
+@inject NavigationManager UriHelper
+@inject ISnackbar SB
+@inject HttpClient http
+@using Microsoft.AspNetCore.Authorization
+@attribute [Authorize(Roles = "Customer")]
+
+<div id="wrapper" style="pointer-events:@pointerEvent; opacity:@opacity">
+	<HomeHeader />
+	<div class="main">
+		<div class="row align-content-center">
+			<div class="col-md-8 offset-2">
+				<h2 class="h2"><center>Make a Complaint</center></h2>
+				<br />
+				<div class="form-group">
+					<h5 class="h5"><i>Please describe your complaint</i></h5>
+					<div class="col-md-11 offset-1"><input type="text" class="form-control rounded-left" placeholder="Details" required @bind-value="complaint.Details"></div>
+				</div>
+				<br />
+				<br />
+				<div class="form-group">
+					<button class="primary" style="width:100%" @onclick="FileComplaint">Submit</button>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+<NavMenu />
+<div style="display:@loadingIcon">
+	<MudProgressCircular Color="Color.Primary" Style="height:70px;width:70px;position:fixed;top:50%;left:50%;" Indeterminate="true" />
+</div>
+
+@code {
+	[Parameter]
+	public string orderID { get; set; }
+	private ComplaintModel complaint = new();
+	private string stock, price, pointerEvent, loadingIcon = "none", qtyTemp = "0";
+	private double opacity = 1;
+	private int qty = 0, avgRating = 0;
+	private bool notOos = true;
+
+	void isLoading(bool value)
+	{
+		if (value)
+		{
+			loadingIcon = "";
+			pointerEvent = "none";
+			opacity = 0.25;
+		}
+		else
+		{
+			loadingIcon = "none";
+			pointerEvent = "";
+			opacity = 1;
+		}
+	}
+
+	private async Task FileComplaint()
+	{
+		if (string.IsNullOrEmpty(complaint.Details))
+		{
+			SB.Add("Please describe your complaint before submiting!", Severity.Error);
+		}
+		else
+		{
+			complaint.OrderId = int.Parse(orderID);
+			var response = await http.PostAsJsonAsync("api/Complaint/FileComplaint", complaint);
+
+			if (response.IsSuccessStatusCode)
+			{
+				SB.Add("Complain filed!");
+				UriHelper.NavigateTo("/view_orders");
+			}
+			else
+			{
+				SB.Add("Couldn't file the complaint. Please try again!", Severity.Error);
+			}
+		}
+	}
+}

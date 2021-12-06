@@ -9,56 +9,83 @@
 	<AdminMenu />
 
 	<MudMainContent>
-        <MudContainer>
-            <MudGrid Class="pt-4">
-                <MudItem xs="12">
-                    <MudPaper Class="d-flex-column mud-width-full" Elevation="3">
-                        <MudText Class="pt-2" Align="Align.Center"><h2>Complaints</h2></MudText>
-                        <table class="table">
-                            <thead>
-                            <tr>
-                                <th>
-                                    Complaint ID
-                                </th>
-                                <th>
-                                    Claiment
-                                </th>
-                                <th>
-                                    Order ID
-                                </th>
-                                <th>
-                                    Shop ID
-                                </th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach (var item in complains)
-                            {
-                               <tr>
-                                    <td>
-                                        <h6 class="h6">@item.CompId</h6>
-                                    </td>
-                                    <td>
-                                        <h6 class="h6">@item.UserId</h6>
-                                    </td>
-                                    <td>
-                                        <h6 class="h6">@item.OrderId</h6>
-                                    </td>
-                                    <td>
-                                        <h6 class="h6">@item.ShopId</h6>
-                                    </td>
-                                </tr> 
-                            }
-                        </tbody>
-                    </table>
-                    </MudPaper>
-                </MudItem>
-            </MudGrid>
-        </MudContainer>
-    </MudMainContent>
+		<MudContainer>
+			<MudGrid Class="pt-4">
+				<MudItem xs="12">
+					<MudPaper Class="d-flex-column mud-width-full" Elevation="3">
+						<MudText Class="pt-2" Align="Align.Center"><h2>Complaints</h2></MudText>
+						<table class="table">
+							<thead>
+								<tr>
+									<th>
+										Complaint ID
+									</th>
+									<th>
+										Claiment
+									</th>
+									<th>
+										Order ID
+									</th>
+									<th>
+										Shop ID
+									</th>
+									<th>
+										Status
+									</th>
+									<th>
+
+									</th>
+								</tr>
+							</thead>
+							<tbody>
+								@foreach (var item in complains)
+								{
+									<tr>
+										<td style="vertical-align:middle;">
+											<h6 class="h6">@item.CompId</h6>
+										</td>
+										<td style="vertical-align:middle;">
+											<h6 class="h6">@item.UserId</h6>
+										</td>
+										<td style="vertical-align:middle;">
+											<h6 class="h6">@item.OrderId</h6>
+										</td>
+										<td style="vertical-align:middle;">
+											<h6 class="h6">@item.ShopId</h6>
+										</td>
+										@{
+											var status = "";
+											if (item.Status == 1) status = "Pending";
+											else status = "Solved";
+										}
+										<td style="vertical-align:middle;">
+											<h6 class="h6">@status</h6>
+										</td>
+										<td style="vertical-align:middle;">
+											<MudIconButton Icon="@Icons.Filled.Article" Color="Color.Primary" title="More details" Style="box-shadow:none; height:auto;" Class="p-0" @onclick="()=>ViewComplaint(item.CompId)"></MudIconButton>
+										</td>
+									</tr>
+								}
+							</tbody>
+						</table>
+					</MudPaper>
+				</MudItem>
+			</MudGrid>
+		</MudContainer>
+	</MudMainContent>
 </MudLayout>
 
 
 @code {
-    private List<ComplaintModel> complains = new();
+	private List<ComplaintModel> complains = new();
+
+	protected override async Task OnInitializedAsync()
+	{
+		complains = await http.GetFromJsonAsync<List<ComplaintModel>>("api/Complaint/GetComplaints/");
+	}
+
+	private void ViewComplaint(int id)
+	{
+		UriHelper.NavigateTo("/view_complaint/" + id);
+	}
 }

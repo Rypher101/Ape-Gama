@@ -1,6 +1,8 @@
-﻿using ApeGama.Shared;
-using Microsoft.EntityFrameworkCore;
+﻿using System;
 using System.Configuration;
+using ApeGama.Shared;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata;
 
 #nullable disable
 
@@ -19,6 +21,7 @@ namespace ApeGama.Server.Data
 
         public virtual DbSet<ComplaintModel> Complaints { get; set; }
         public virtual DbSet<ImageModel> Images { get; set; }
+        public virtual DbSet<NotificationModel> Notifications { get; set; }
         public virtual DbSet<OnlineShopModel> OnlineShops { get; set; }
         public virtual DbSet<OrderModel> Orders { get; set; }
         public virtual DbSet<OrderProductModel> OrderProducts { get; set; }
@@ -40,6 +43,8 @@ namespace ApeGama.Server.Data
 
             modelBuilder.Entity<ComplaintModel>(entity =>
             {
+                entity.Property(e => e.Status).HasDefaultValueSql("((1))");
+
                 entity.HasOne(d => d.Order)
                     .WithMany(p => p.Complaints)
                     .HasForeignKey(d => d.OrderId)
@@ -65,6 +70,15 @@ namespace ApeGama.Server.Data
                     .HasForeignKey(d => d.ProdId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("FK_Image_Product");
+            });
+
+            modelBuilder.Entity<NotificationModel>(entity =>
+            {
+                entity.HasOne(d => d.User)
+                    .WithMany(p => p.Notifications)
+                    .HasForeignKey(d => d.UserId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("FK_Notification_User");
             });
 
             modelBuilder.Entity<OnlineShopModel>(entity =>

@@ -106,6 +106,7 @@
     {
         isLoading(true);
         orderModel = await http.GetFromJsonAsync<List<OrderModel>>("api/Order/GetOrders");
+        _ = await http.GetFromJsonAsync<NotificationModel>("api/Notification/RemoveNotification/" + 2);
         isLoading(false);
 
         if (orderModel == null || orderModel.Count == 0)
