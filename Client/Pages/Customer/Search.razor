@@ -1,0 +1,108 @@
+﻿@page "/search"
+@inject NavigationManager UriHelper
+@inject ISnackbar SB
+@inject HttpClient http
+
+<div id="wrapper" style="pointer-events:@pointerEvent; opacity:@opacity">
+	<HomeHeader />
+	<div class="main">
+		<div class="row align-content-center" style="padding-top:10px; padding-left:40px; padding-right:40px">
+			<div class="col-md-12">
+				<h2 class="h2"><center>Search</center></h2>
+				<MudItem Class="row">
+					<MudTextField @bind-Value="keyword" Variant="Variant.Text"></MudTextField>
+					<MudIconButton Icon="@Icons.Filled.Search" Style="box-shadow:none; padding:0px; width:100px;" OnClick="initSearch"></MudIconButton>
+				</MudItem>
+				<br />
+				<table class="table">
+					<thead>
+						<tr>
+							<th>
+								Product Name
+							</th>
+							<th>
+								Shop
+							</th>
+							<th>
+								Status
+							</th>
+							<th></th>
+						</tr>
+					</thead>
+					<tbody>
+						@if (products.Count > 0)
+						{
+							foreach (var prod in products)
+							{
+								var status = "";
+								if (prod.ProdStock > 0)
+								{
+									status = "In Stock";
+								}
+								else
+								{
+									status = "Out of Stock";
+								}
+								<tr>
+									<td>
+										<h6 class="h6"><b>@prod.ProdName</b></h6>
+									</td>
+									<td>
+										<h6 class="h6"><b>@prod.Shop.ShopName</b></h6>
+									</td>
+									<td>
+										<h6 class="h6"><b>@status</b></h6>
+									</td>
+									<td>
+										<MudIconButton Icon="@Icons.Material.Filled.Article" Color="Color.Default" Style="box-shadow:none; height:auto" Title="View item" OnClick="()=>GoToItem(prod.ProdId)"/>
+									</td>
+								</tr>
+							}
+						}
+					</tbody>
+				</table>
+			</div>
+		</div>
+	</div>
+</div>
+
+<NavMenu NavItem="Search" />
+@code {
+	private string pointerEvent, loadingIcon = "none", keyword;
+	private double opacity = 1;
+	private List<ProductModel> products = new();
+
+	void isLoading(bool value)
+	{
+		if (value)
+		{
+			loadingIcon = "";
+			pointerEvent = "none";
+			opacity = 0.25;
+		}
+		else
+		{
+			loadingIcon = "none";
+			pointerEvent = "";
+			opacity = 1;
+		}
+	}
+
+	async void initSearch()
+	{
+		if (string.IsNullOrEmpty(keyword))
+		{
+			SB.Add("Please insert a keyword to search", Severity.Error);
+		}
+		else
+		{
+			products = await http.GetFromJsonAsync<List<ProductModel>>("api/Product/SearchProduct/" + keyword);
+			StateHasChanged();
+		}
+	}
+
+	void GoToItem(int id)
+	{
+		UriHelper.NavigateTo("/view_product/" + id);
+	}
+}

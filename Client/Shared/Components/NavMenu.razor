@@ -4,20 +4,20 @@
 
 <style>
 	.notification {
-  color: white;
-  text-decoration: none;
-  padding: 15px 26px;
-  position: relative;
-}
+		color: white;
+		text-decoration: none;
+		padding: 15px 26px;
+		position: relative;
+	}
 
-	 .notification .badge {
-  position: absolute;
-  right: -10px;
-  padding: 5px 10px;
-  border-radius: 50%;
-  background: red;
-  color: red;
-}
+		.notification .badge {
+			position: absolute;
+			right: -10px;
+			padding: 5px 10px;
+			border-radius: 50%;
+			background: red;
+			color: red;
+		}
 
 </style>
 <nav id="menu">
@@ -28,14 +28,19 @@
 			<AuthorizeView Roles="Supplier">
 				<Authorized>
 					<li style="display:@oldShop"><a href="/online_shop" class="@OnlineShop">Online Shop</a></li>
-					<li><a href="/view_orders_Supplier" class="@Orders"><span>Orders</span><MudIcon Icon="@Icons.Material.Filled.Circle" Class="badge" Size="Size.Large" Style="@orderNotifi" Color="Color.Warning"/></a></li>
+					<li><a href="/view_orders_Supplier" class="@Orders"><span>Orders</span><MudIcon Icon="@Icons.Material.Filled.Circle" Class="badge" Size="Size.Large" Style="@orderNotifi" Color="Color.Warning" /></a></li>
 				</Authorized>
 			</AuthorizeView>
-			<li><a href="/marketplace" class="@Marketplace notification"><span>Marketplace</span></a></li>
+			<li>
+				<a href="/marketplace" class="@Marketplace notification dropdown-toggle"><span>Marketplace</span></a>
+				<ul>
+					<li><a href="/search" class="@Search">Search</a></li>
+				</ul>
+			</li>
 			<AuthorizeView Roles="Customer">
 				<Authorized>
-					<li><a href="/view_cart" class="@Cart"><span>Cart</span><MudIcon Icon="@Icons.Material.Filled.Circle" Class="badge" Size="Size.Large" Style="@cartNotifi" Color="Color.Warning"/></a></li>
-					<li><a href="/view_orders" class="@Orders"><span>Orders</span><MudIcon Icon="@Icons.Material.Filled.Circle" Class="badge" Size="Size.Large" Style="@orderNotifi" Color="Color.Warning"/></a></li>
+					<li><a href="/view_cart" class="@Cart"><span>Cart</span><MudIcon Icon="@Icons.Material.Filled.Circle" Class="badge" Size="Size.Large" Style="@cartNotifi" Color="Color.Warning" /></a></li>
+					<li><a href="/view_orders" class="@Orders"><span>Orders</span><MudIcon Icon="@Icons.Material.Filled.Circle" Class="badge" Size="Size.Large" Style="@orderNotifi" Color="Color.Warning" /></a></li>
 				</Authorized>
 			</AuthorizeView>
 			<AuthorizeView>
@@ -61,7 +66,7 @@
 @code {
 	[Parameter]
 	public string NavItem { get; set; }
-	public string Home, LoginCus, LoginSup, OnlineShop, Marketplace, Profile, Cart, Orders, LoginAdmNav;
+	public string Home, LoginCus, LoginSup, OnlineShop, Marketplace, Profile, Cart, Orders, LoginAdmNav, Search;
 	private string cartNotifi = "display: none", orderNotifi = "display: none";
 	private string oldShop = "none";
 	private List<NotificationModel> notifications = new();
@@ -96,6 +101,9 @@
 				break;
 			case "LoginAdmNav":
 				LoginAdmNav = "active";
+				break;
+			case "Search":
+				Search = "active";
 				break;
 			default:
 				break;
@@ -141,5 +149,5 @@
 		}
 	}
 
-	
+
 }

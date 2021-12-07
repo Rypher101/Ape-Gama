@@ -441,6 +441,13 @@ namespace ApeGama.Server.Controllers
             return Ok();
         }
 
+        [HttpGet("{keyword}")]
+        public List<ProductModel> SearchProduct(string keyword)
+        {
+            var prods = _context.Products.Where(e => e.ProdName.Contains(keyword)).Include(e=>e.Shop).ToList();
+            return prods;
+        }
+
         private bool ProductModelExists(int id)
         {
             return _context.Products.Any(e => e.ProdId == id);

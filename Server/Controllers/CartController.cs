@@ -171,5 +171,31 @@ namespace ApeGama.Server.Controllers
             }
 
         }
+
+        [HttpGet("{id}")]
+        public IActionResult DeleteFromCart(int id)
+        {
+            try
+            {
+                List<CartModel> cartModel = new List<CartModel>();
+                var cart = HttpContext.Session.GetString("Cart");
+                if (!string.IsNullOrWhiteSpace(cart))
+                    cartModel = JsonConvert.DeserializeObject<List<CartModel>>(cart);
+
+                var tempRemove = cartModel.FirstOrDefault(e => e.prodID == id);
+                if (tempRemove != null)
+                {
+                    cartModel.Remove(tempRemove);
+                }
+
+                HttpContext.Session.SetString("Cart", JsonConvert.SerializeObject(cartModel));
+            }
+            catch (Exception)
+            {
+                return BadRequest();
+            }
+
+            return Ok();
+        }
     }
 }

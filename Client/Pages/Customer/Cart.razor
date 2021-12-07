@@ -33,6 +33,7 @@
 										Cost
 									</th>
 									<th></th>
+									<th></th>
 								</tr>
 							</thead>
 							<tbody>
@@ -44,20 +45,23 @@
 
 									var cost = prod.price * prod.qty;
 									<tr>
-										<td>
+										<td style="vertical-align: middle;">
 											<h6 class="h6"><b>@prod.product</b></h6>
 										</td>
-										<td align="right">
+										<td align="right" style="vertical-align: middle;">
 											<h6 class="h6"><b>@prod.qty</b></h6>
 										</td>
-										<td align="right">
+										<td align="right" style="vertical-align: middle;">
 											<h6 class="h6"><b>Rs. @prod.price</b></h6>
 										</td>
-										<td align="right">
+										<td align="right" style="vertical-align: middle;">
 											<h6 class="h6"><b>Rs. @cost</b></h6>
 										</td>
-										<td>
+										<td align="right">
 											<MudIconButton Icon="@Icons.Material.Filled.Assessment" Color="Color.Default" @onclick="@(()=>ViewItem(prod.prodID))" Style="box-shadow:none; height:auto" />
+										</td>
+										<td>
+											<MudIconButton Icon="@Icons.Material.Filled.Close" Color="Color.Error" @onclick="@(()=>DeleteFromCart(prod.prodID))" Style="box-shadow:none; height:auto" />
 										</td>
 									</tr>
 									tot += cost;
@@ -168,5 +172,26 @@
 	void ViewItem(int id)
 	{
 		UriHelper.NavigateTo("/view_product/" + id);
+	}
+
+	async Task DeleteFromCart(int id)
+	{
+		isLoading(true);
+		_ = await http.GetAsync("api/Cart/DeleteFromCart/" + id);
+		cartModel = await http.GetFromJsonAsync<List<CartModel>>("api/Cart/GetCartDetails");
+		isLoading(false);
+
+		if (cartModel == null || cartModel.Count == 0){
+			gropedList.Clear();
+			itemsInCart = false;
+			}
+		else
+		{
+			shopID = cartModel.First().shopID;
+			gropedList = cartModel.GroupBy(e => e.shopName).ToList();
+			itemsInCart = true;
+		}
+
+		StateHasChanged();
 	}
 }
