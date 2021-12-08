@@ -37,6 +37,8 @@ namespace ApeGama.Server.Controllers
                     }
                     else
                     {
+                        if (user.UserStatus == false) return BadRequest();
+
                         HttpContext.Session.SetInt32("UID", user.UserId);
                         HttpContext.Session.SetString("UName", user.UserName);
                         HttpContext.Session.SetString("UEmail", user.UserEmail);
@@ -55,6 +57,8 @@ namespace ApeGama.Server.Controllers
                         }
                         else
                         {
+                            if (user.UserStatus == false) return BadRequest();
+
                             HttpContext.Session.SetInt32("UID", user.UserId);
                             HttpContext.Session.SetString("UName", user.UserName);
                             HttpContext.Session.SetString("UEmail", user.UserEmail);

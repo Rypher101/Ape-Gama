@@ -76,7 +76,8 @@
         }
         else
         {
-            SB.Add("Invalid user credentials!", Severity.Error);
+            if(response.StatusCode == System.Net.HttpStatusCode.BadRequest) SB.Add("Your account has been permenently banned due to vialoting customer rights!",Severity.Error);
+            else SB.Add("Invalid user credentials!", Severity.Error);
         }
     }
 
