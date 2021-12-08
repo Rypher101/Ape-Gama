@@ -14,25 +14,25 @@
 					<MudIconButton Icon="@Icons.Filled.Search" Style="box-shadow:none; padding:0px; width:100px;" OnClick="initSearch"></MudIconButton>
 				</MudItem>
 				<br />
-				<table class="table">
-					<thead>
-						<tr>
-							<th>
-								Product Name
-							</th>
-							<th>
-								Shop
-							</th>
-							<th>
-								Status
-							</th>
-							<th></th>
-						</tr>
-					</thead>
-					<tbody>
-						@if (products.Count > 0)
-						{
-							foreach (var prod in products)
+				@if (products.Count > 0)
+				{
+					<table class="table">
+						<thead>
+							<tr>
+								<th>
+									Product Name
+								</th>
+								<th>
+									Shop
+								</th>
+								<th>
+									Status
+								</th>
+								<th></th>
+							</tr>
+						</thead>
+						<tbody>
+							@foreach (var prod in products)
 							{
 								var status = "";
 								if (prod.ProdStock > 0)
@@ -54,13 +54,13 @@
 										<h6 class="h6"><b>@status</b></h6>
 									</td>
 									<td>
-										<MudIconButton Icon="@Icons.Material.Filled.Article" Color="Color.Default" Style="box-shadow:none; height:auto" Title="View item" OnClick="()=>GoToItem(prod.ProdId)"/>
+										<MudIconButton Icon="@Icons.Material.Filled.Article" Color="Color.Default" Style="box-shadow:none; height:auto" Title="View item" OnClick="()=>GoToItem(prod.ProdId)" />
 									</td>
 								</tr>
 							}
-						}
-					</tbody>
-				</table>
+						</tbody>
+					</table>
+				}
 			</div>
 		</div>
 	</div>
